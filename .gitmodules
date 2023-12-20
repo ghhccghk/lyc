@@ -1,0 +1,3 @@
+[submodule "lyrics_backend"]
+	path = lyrics_backend
+	url = https://github.com/ghhccghk/ypm-lyrics-backend.git

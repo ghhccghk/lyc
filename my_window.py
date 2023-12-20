@@ -9,7 +9,6 @@ import io
 from PIL import Image, ImageTk
 import tkinter as tk
 import string
-import interface
 import faulthandler
 
 ########PySide6 引用
@@ -26,7 +25,8 @@ from qfluentwidgets import FluentIcon as FIF
 
 #####其他py文件引用
 from my_window_ui import MyWindowUI,LyricLabel,playbackcontrol,SimpleMediaPlayBar
-from interface import getCurrentLyric
+from lyrics_backend.interface import getCurrentLyric
+import lyrics_backend.interface
 
 #########对接linux dbus 引用
 import gobject
@@ -228,7 +228,7 @@ class Main(SplitFluentWindow):
 
 ##################歌词更新代码
     def update_label(self):
-        res = interface.getCurrentLyric(0)
+        res = lyrics_backend.interface.getCurrentLyric(0)
         lyric = res.get('lyric', '')  # 如果 'lyric' 键不存在，返回空字符串
         tlyric = res.get('tlyric', '') # 如果 'lyric' 键不存在，返回空字符串
         status = res.get('status', '')
