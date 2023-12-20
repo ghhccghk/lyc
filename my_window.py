@@ -133,12 +133,12 @@ class Main(SplitFluentWindow):
 ##########侧边栏添加
     def initNavigation(self):
         # add sub interface
-        self.addSubInterface(self.ui,
-                             QIcon(os.path.join(basedir, "res/icons/SystemPanel.png")),
-                             self.tr('设置'))
         self.addSubInterface(self.ui1,
                              QIcon(os.path.join(basedir, "res/icons/jump.svg")),
                              self.tr('播放控制'))
+        self.addSubInterface(self.ui,
+                             QIcon(os.path.join(basedir, "res/icons/SystemPanel.png")),
+                             self.tr('设置'))
 ##########控制歌词显示代码
     def show_desktopLyric(self):
         self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
