@@ -1,26 +1,19 @@
 from PySide6 import QtWidgets
-from PySide6.QtWidgets import QApplication
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QLocale,QPointF, QPropertyAnimation, QObject, Property,QAbstractAnimation,Signal,QTimer,QRegularExpression,QRect,QSize
 from PySide6.QtGui import QFontDatabase,QPainter,QFont,QPainterPath,QFontMetrics,QPen,QColor,QIcon,QRegularExpressionValidator,QPixmap,QImage
 from PySide6.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout,QLabel,QLineEdit,QFrame
 
 
-from qfluentwidgets import  FluentTranslator,ScrollArea
 from qframelesswindow import AcrylicWindow
-from qfluentwidgets import setThemeColor
-from qfluentwidgets import FluentTranslator,SplitTitleBar,MSFluentWindow,FluentWindow,SplitFluentWindow,PushButton,ComboBox,VBoxLayout, ComboBox, setTheme, Theme, setThemeColor, EditableComboBox, setFont, FluentThemeColor, ExpandLayout,SpinBox,SwitchButton,getIconColor, Theme, FluentIcon,ToolButton
+from qfluentwidgets import PushButton,ComboBox,VBoxLayout, setTheme, Theme, setThemeColor, setFont, ExpandLayout,SpinBox,SwitchButton, Theme, FluentIcon,ToolButton,ScrollArea
 from qfluentwidgets.multimedia import MediaPlayBarButton
 from qfluentwidgets.multimedia.media_play_bar import MediaPlayBarBase
-from qfluentwidgets.multimedia.media_player import MediaPlayer, MediaPlayerBase
 from qfluentwidgets.components.widgets.label import CaptionLabel
-import os
-from sys import platform
 
-if platform == 'win32':
-    basedir = ''
-else:
-    basedir = os.path.dirname(__file__)
+import os
+
+basedir = os.path.dirname(__file__)
 
 class MyWindowUI(ScrollArea):
     def __init__(self, sizeHintdb: tuple[int, int], parent=None):
@@ -196,6 +189,36 @@ class playbackcontrol(ScrollArea):
         return f'{h}:{m:02}:{s:02}'
 
 
+class aboueInterface(ScrollArea):
+    def __init__(self, sizeHintdb: tuple[int, int], parent=None):
+        super().__init__(parent=parent)
+        # setting label
+        self.setObjectName("aboueInterface")
+        self.scrollWidget = QWidget()
+        self.expandLayout = ExpandLayout(self.scrollWidget)
+
+        afont = QFont()
+        afont.setFamily("黑体")  # 字体
+        afont.setPointSize(11)  # 字体大小
+        afont.setBold(True)  # 粗体
+
+        bfont = QFont()
+        bfont.setFamily("黑体")  # 字体
+        bfont.setPointSize(15)  # 字体大小
+        bfont.setBold(True)  # 粗体
+
+        self.label0 = QtWidgets.QLabel(self.tr("关于"), self)
+        self.label0.move(25, 60)
+        self.label0.setFont(bfont)
+
+        self.label_pic = QLabel(self)
+        self.label_pic.setGeometry(QRect(95, 135, 300, 300))
+        self.label_pic.setFrameShape(QFrame.NoFrame)
+        image = QPixmap(os.path.join(basedir, "res/icons/108.png"))
+        self.label_pic.setPixmap(image)
+        self.label_pic.setScaledContents(True)
+
+
 class SimpleMediaPlayBar(MediaPlayBarBase):
     """ Standard media play bar """
 ####qfluentwidgets拿过来魔改
@@ -247,7 +270,6 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.buttonLayout.addWidget(self.leftButtonContainer, 0, Qt.AlignLeft)
         self.buttonLayout.addWidget(self.centerButtonContainer, 0, Qt.AlignHCenter)
         self.buttonLayout.addWidget(self.rightButtonContainer, 0, Qt.AlignRight)
-        self.setMediaPlayer(MediaPlayer(self))
 
 
 

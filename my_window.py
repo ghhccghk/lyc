@@ -3,28 +3,22 @@ import jsonpath
 import requests
 import sys
 import os
-from sys import platform
 import re
 import io
-from PIL import Image, ImageTk
-import tkinter as tk
 import string
 import faulthandler
-
 ########PySide6 引用
 from PySide6 import QtWidgets
 from PySide6 import QtCore
-from PySide6.QtCore import Qt, QLocale,QPointF, QPropertyAnimation, QObject, Property,QAbstractAnimation,Signal,QUrl,QRect
-from PySide6.QtGui import QFontDatabase,QPainter,QFont,QPainterPath,QFontMetrics,QPen,QColor,QIcon,QDesktopServices,QPalette,QPixmap
-from PySide6.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout,QColorDialog
+from PySide6.QtCore import Qt, QLocale, QObject,Signal,QUrl,QRect
+from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 #######qframelesswindow 引用
 from qframelesswindow import AcrylicWindow
-from qfluentwidgets import FluentTranslator,SplitTitleBar,MSFluentWindow,FluentWindow,SplitFluentWindow,ColorDialog
-from qfluentwidgets import FluentIcon as FIF
+from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition
 
 #####其他py文件引用
-from my_window_ui import MyWindowUI,LyricLabel,playbackcontrol,SimpleMediaPlayBar
+from my_window_ui import MyWindowUI,LyricLabel,playbackcontrol,aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 
@@ -37,11 +31,7 @@ import pympris
 
 #debug使用
 #faulthandler.enable()
-
-if platform == 'win32':
-    basedir = ''
-else:
-    basedir = os.path.dirname(__file__)
+basedir = os.path.dirname(__file__)
 
 
 status: int
@@ -79,6 +69,7 @@ class Main(SplitFluentWindow):
         self.resize(600,640)
         self.ui = MyWindowUI(sizeHintdb=(minWidth, minHeight), parent=self)
         self.ui1 = playbackcontrol(sizeHintdb=(minWidth, minHeight), parent=self)
+        self.aboueInterface = aboueInterface(sizeHintdb=(minWidth, minHeight), parent=self)
 ##################ui修改
         self.setWindowTitle("设置")
         self.setWindowIcon(QIcon(os.path.join(basedir,"res/icons/SystemPanel.png")))
@@ -137,8 +128,14 @@ class Main(SplitFluentWindow):
                              QIcon(os.path.join(basedir, "res/icons/jump.svg")),
                              self.tr('播放控制'))
         self.addSubInterface(self.ui,
-                             QIcon(os.path.join(basedir, "res/icons/SystemPanel.png")),
-                             self.tr('设置'))
+                             FluentIcon.SETTING,
+                             self.tr('设置'),
+                             NavigationItemPosition.BOTTOM)
+        self.addSubInterface(self.aboueInterface,
+                             FluentIcon.INFO,
+                             self.tr('关于'),
+                             NavigationItemPosition.BOTTOM)
+
 ##########控制歌词显示代码
     def show_desktopLyric(self):
         self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
