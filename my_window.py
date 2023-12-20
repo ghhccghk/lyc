@@ -270,7 +270,7 @@ class Main(SplitFluentWindow):
         ddd = res11["currentTrack"]["id"]
         if res1111 != "" :
             singername = res11["currentTrack"]["artists"][0]
-            alname = res11["currentTrack"]["alias"][0]
+            alname = res11["currentTrack"]["album"]["name"]
             picurl = res11["currentTrack"]["album"]["blurPicUrl"]
         else:
             singername = res11["currentTrack"]["ar"][0]
