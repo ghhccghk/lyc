@@ -6,7 +6,7 @@
 
 ------------
 
-
+=======
 ### 环境搭建
   首先在本地创建新的 **conda** 环境
   ```
@@ -25,9 +25,7 @@ cd “克隆的项目位置”
 conda activate lyc
 python my_window.py
 ```
-
 ------------
-
 
 ### 关于项目引用和参考
 - UI 基于 [Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 设计。
@@ -37,6 +35,6 @@ python my_window.py
 
 ------------
 
-
+>>>>>>> b9844033e087bd45c9d13119377cee3298455c41
 ### 关于部分图片版权声明
 - 在本项目下 res/icons/108.png 属于我个人版权，未经允许，拒绝商业使用。如需商用本项目请替换图片。
