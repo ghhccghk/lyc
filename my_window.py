@@ -7,6 +7,7 @@ import re
 import io
 import string
 import faulthandler
+import random
 ########PySide6 引用
 from PySide6 import QtWidgets
 from PySide6 import QtCore
@@ -21,7 +22,7 @@ from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationIt
 from my_window_ui import MyWindowUI,LyricLabel,playbackcontrol,aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
-
+from hotcomments import hotComments
 #########对接linux dbus 引用
 import gobject
 import dbus
@@ -60,13 +61,20 @@ trackid: str
 length: str
 playaa: str = 0####播放状态指示
 
+####随机数生成
+stra = ''
+a=stra.join(random.choice("0123456789abcdef") for i in range(32))
+song_id: int
+song_id1: int = 0
 
+####网易云热评定义变量
+new_comments: str
 
 class Main(SplitFluentWindow):
     global font,bold,underline,pointSize
-    def __init__(self, minWidth=610, minHeight=600):
+    def __init__(self, minWidth=590, minHeight=650):
         super().__init__()
-        self.resize(600,640)
+        self.resize(570,650)
         self.ui = MyWindowUI(sizeHintdb=(minWidth, minHeight), parent=self)
         self.ui1 = playbackcontrol(sizeHintdb=(minWidth, minHeight), parent=self)
         self.aboueInterface = aboueInterface(sizeHintdb=(minWidth, minHeight), parent=self)
@@ -99,6 +107,7 @@ class Main(SplitFluentWindow):
         if players_ids != '' :
             self.c = QtCore.QTimer(self)
             self.c.timeout.connect(self.setplayers)
+            self.c.timeout.connect(self.hotsettime)
             self.c.start(1000)  # 每隔100毫秒更新一次
 
 
@@ -108,6 +117,7 @@ class Main(SplitFluentWindow):
         self.ui.button1.clicked.connect(self.show_desktopLyric)
         self.ui.pointSize.valueChanged.connect(self.button2)
         self.ui.switchbold.checkedChanged.connect(self.setbold)
+        # self.ui.switchbold.checkedChanged.connect(self.hot)
         self.ui.switchunderline.checkedChanged.connect(self.setunderline)
         self.ui.button2.clicked.connect(self.showColorDialog)
 ######### 播放按钮控制
@@ -115,12 +125,27 @@ class Main(SplitFluentWindow):
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
         self.ui1.bas.play.clicked.connect(self.playa)
         self.ui1.bas.progressSlider.sliderMoved.connect(self.plaa)
+#########置顶更新
+        self.ui.CheckBox1.clicked.connect(self.on_inTopCheckBox_clicked)
 
         self.desktopLyric = LyricLabel()
         self.change_font()
 #        self.update_pic()
 
 #        self.ui1.combo_box.currentTextChanged.connect(self.playerss)
+###############窗口置顶
+    def on_inTopCheckBox_clicked(self, checked):
+        # print(checked)
+        if checked != True :
+            self.desktopLyric.setWindowFlags(QtCore.Qt.Widget | Qt.FramelessWindowHint)# 取消置顶
+            # self.desktopLyric.setWindowFlags(Qt.FramelessWindowHint)
+            self.desktopLyric.show()
+        else:
+            self.desktopLyric.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)# 置顶
+            # self.desktopLyric.setWindowFlags(Qt.FramelessWindowHint)
+            self.desktopLyric.show()
+
+
 ##########侧边栏添加
     def initNavigation(self):
         # add sub interface
@@ -167,7 +192,43 @@ class Main(SplitFluentWindow):
         pointSize = int(self.ui.pointSize.value())
 #        print(pointSize)
         self.change_font()
-######颜色设置组件
+#####歌曲热评获取
+    def hotsettime(self):
+        global song_id
+        global song_id1
+        if song_id != song_id1 :
+            self.hotset()
+
+    def hotset(self):
+      global new_comments
+      self.hotget()
+      random_number = random.randint(1, 15)
+      aaaaa = random_number
+      for item in new_comments:
+          if "username_" + str(aaaaa) in item:
+              username = item["username_" + str(aaaaa) ]
+              hotcomments = item["hotcomments_" + str(aaaaa) ]
+              hotcomment = hotcomments.replace("\n", " ； ")
+              self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
+
+
+
+    def hotget(self):
+      global a
+      global song_id
+      global song_id1
+      global new_comments
+      song_id1 = song_id
+      comments = hotComments(song_id,a)
+      new_comments = []
+      for idx, comment in enumerate(comments, 1):
+            new_comment = {}
+            for key, value in comment.items():
+                new_key = f"{key}_{idx}"
+                new_value = value
+                new_comment[new_key] = new_value
+            new_comments.append(new_comment)
+
     def showColorDialog(self):
         w = ColorDialog(Qt.cyan, self.tr('颜色设置'), self.window(),enableAlpha=True)
         w.colorChanged.connect(lambda c: self.setcolor(c))
@@ -205,13 +266,7 @@ class Main(SplitFluentWindow):
         else:
             self.desktopLyric.setFont(qfont)
 
-###############窗口置顶
-    def on_CheckBox_clicked(self, checked):
-        if not checked:
-            self.desktopLyric.setWindowFlags(Qt.Widget)  # 取消置顶
-        else:
-            self.desktopLyric.setWindowFlags(Qt.WindowStaysOnTopHint)  # 置顶
-        self.desktopLyric.show()
+
 ###############设置控制的播放器
 
     def setplayers(self):
@@ -225,11 +280,13 @@ class Main(SplitFluentWindow):
 
 ##################歌词更新代码
     def update_label(self):
+        global song_id
         res = lyrics_backend.interface.getCurrentLyric(0)
         lyric = res.get('lyric', '')  # 如果 'lyric' 键不存在，返回空字符串
         tlyric = res.get('tlyric', '') # 如果 'lyric' 键不存在，返回空字符串
         status = res.get('status', '')
         asa = res.get('e', '正常')
+        song_id = asa
               ##读取歌词显示情况
         if self.desktopLyric.isVisible():
             self.ui.label3.setText(self.tr("歌词：已显示"))
