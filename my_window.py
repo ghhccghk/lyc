@@ -165,6 +165,7 @@ class Main(SplitFluentWindow):
     def show_desktopLyric(self):
         self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
         if self.desktopLyric.isVisible():
+            self.ui.CheckBox1.setChecked(False)
             self.desktopLyric.close()
         else:
             self.desktopLyric.show()

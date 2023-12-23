@@ -8,6 +8,8 @@
 
 ### 展示
 ![展示](st.png)
+![展示](st1.png)
+![展示](st2.png)
 
 ------------
 
@@ -20,6 +22,7 @@
   pip install pyside6==6.5.2
   pip install dbus-python
   pip install pympris
+  pip install pyexecjs
   ```
 克隆本项目到本地并克隆模块
 
@@ -35,9 +38,10 @@ python my_window.py
 - UI 基于 [Fluent-Widgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets) 设计。
 - 引用了 [ypm-lyrics-backend](https://github.com/LiYulin-s/ypm-lyrics-backend) 库，由于有修改单独开源到[ypm-lyrics-backend](https://github.com/ghhccghk/ypm-lyrics-backend)。
 - 使用了来自[pympris](https://github.com/wistful/pympris)库。
-- 参考了[呆啵宠物 (DyberPet)](https://github.com/ChaozhongLiu/DyberPet) UI写法
+- 参考了[呆啵宠物 (DyberPet)](https://github.com/ChaozhongLiu/DyberPet) UI写法。
+- 评论获取参考了墨雪飘影的方法，在此感谢大佬。
 
 ------------
 
 ### 关于部分图片版权声明
-- 在本项目下 res/icons/108.png 属于我个人版权，未经允许，拒绝商业使用。如需商用本项目请替换图片。
+- 在本项目下 res/icons/108.png 属于我个人版权，未经允许，拒绝商业使用。如需商用本项目请替换图片，还有Fluent-Widgets请自行购买商业授权。
