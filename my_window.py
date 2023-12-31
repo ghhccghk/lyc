@@ -12,7 +12,7 @@ import random
 from PySide6 import QtWidgets
 from PySide6 import QtCore
 from PySide6.QtCore import Qt, QLocale, QObject,Signal,QUrl,QRect
-from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap
+from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap,QColor
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 #######qframelesswindow 引用
 from qframelesswindow import AcrylicWindow
@@ -231,9 +231,12 @@ class Main(SplitFluentWindow):
             new_comments.append(new_comment)
 
     def showColorDialog(self):
-        w = ColorDialog(Qt.cyan, self.tr('颜色设置'), self.window(),enableAlpha=True)
-        w.colorChanged.connect(lambda c: self.setcolor(c))
-        w.exec()
+        global foncolor
+        # print(foncolor)
+        colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
+        colorset.setColor(QColor(foncolor), movePicker=True)
+        colorset.colorChanged.connect(lambda c: self.setcolor(c))
+        colorset.exec()
 
 # #
     def setcolor(self,c):

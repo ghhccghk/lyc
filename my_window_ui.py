@@ -345,7 +345,7 @@ class LyricLabel(QLabel):
 
     ###歌词显示
     def update_lyric(self):
-        self.setAlignment(Qt.AlignCenter)
+        # self.setAlignment(Qt.AlignCenter)
         if  self.lyric1 == ""  :
             self.setText(" ")
         else:
@@ -366,7 +366,7 @@ class LyricLabel(QLabel):
         self.timer.start(300)
 
 
-    ###歌词滚动
+    ###歌词滚动 废弃
     def scroll_lyric(self):
         if len(self.lyric1) > 0 and len(self.lyric2) > 0:
             self.lyric1 = self.lyric1[1:] + self.lyric1[0]
