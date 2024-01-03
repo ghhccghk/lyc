@@ -312,14 +312,14 @@ class Main(SplitFluentWindow):
 
     def hotget(self):
       allset.song_id1 = allset.song_id
-      comments = hotComments(song_id,a)
+      comments = hotComments(allset.song_id,allset.a)
       allset.new_comments = []
       for idx, comment in enumerate(comments, 1):
             allset.new_comment = {}
             for key, value in comment.items():
                 new_key = f"{key}_{idx}"
                 new_value = value
-                new_comment[new_key] = new_value
+                allset.new_comment[new_key] = new_value
             allset.new_comments.append(allset.new_comment)
     #
     # def showColorDialog(self):
