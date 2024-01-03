@@ -11,64 +11,36 @@ import random
 ########PySide6 引用
 from PySide6 import QtWidgets
 from PySide6 import QtCore
-from PySide6.QtCore import Qt, QLocale, QObject,Signal,QUrl,QRect
-from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap,QColor
+from PySide6.QtCore import Qt, QLocale, QObject,Signal,QUrl,QRect,QPoint
+from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap,QColor, QAction,QGuiApplication
+from PySide6.QtWidgets import QSystemTrayIcon,QMenu, QMessageBox,QApplication
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 #######qframelesswindow 引用
 from qframelesswindow import AcrylicWindow
-from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition
+from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
 
 #####其他py文件引用
-from my_window_ui import MyWindowUI,LyricLabel,playbackcontrol,aboueInterface
+from ui.my_window_ui import MyWindowUI,LyricLabel
+from ui.playbackcontrol_ui import playbackcontrol
+from ui.aboueInterface_ui import aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
-from hotcomments import hotComments
+from module.hotcomments import hotComments
+from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,showColorDialog,change_font
+
 #########对接linux dbus 引用
 import gobject
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 import pympris
 
+#######全局变量设置
+from module import allset
 
 #debug使用
 #faulthandler.enable()
 basedir = os.path.dirname(__file__)
 
-
-status: int
-id: int
-lyrics: dict = {}
-trans: bool = True
-tlyrics: dict = {}
-progress: float
-currentLyric: str
-#####默认字体变量
-fonta: str = "文泉驿等宽微米黑"  ###字体
-bold: bool = True  ####粗细
-underline: bool = False #####下划线
-pointSize: int = 20.22  ###字号
-foncolor: str = "00000000" ####黑色
-ids = 0
-#######对接linux dbus控制播放
-dbus_loop = DBusGMainLoop()
-bus = dbus.SessionBus(mainloop=dbus_loop)
-players_ids = list(pympris.available_players())
-picl: str = 0
-picurl: str
-ddd: str
-idss: str = players_ids[0]
-trackid: str
-length: str
-playaa: str = 0####播放状态指示
-
-####随机数生成
-stra = ''
-a=stra.join(random.choice("0123456789abcdef") for i in range(32))
-song_id: int
-song_id1: int = 0
-
-####网易云热评定义变量
-new_comments: str
 
 class Main(SplitFluentWindow):
     global font,bold,underline,pointSize
@@ -85,26 +57,26 @@ class Main(SplitFluentWindow):
         self.initNavigation()
 ##################功能代码
 
-        if players_ids != '' :
+        if allset.players_ids != '' :
             self.timer = QtCore.QTimer(self)
             self.timer.timeout.connect(self.update_label)
             self.timer.start(100)  # 每隔300毫秒（1秒）更新一次
-        if players_ids != '' :
+        if allset.players_ids != '' :
 #        self.initWindow()
             self.ab = QtCore.QTimer(self)
             self.ab.timeout.connect(self.button1)
             self.ab.start(100)  # 每隔100毫秒更新一次
-        if players_ids != '' :
+        if allset.players_ids != '' :
             self.a = QtCore.QTimer(self)
             self.a.timeout.connect(self.update_a)
             self.a.start(100)  # 每隔100毫秒更新一次
-        if players_ids != '' :
+        if allset.players_ids != '' :
             self.b = QtCore.QTimer(self)
             self.b.timeout.connect(self.update_pic)
             self.b.timeout.connect(self.updateplayer)
             self.b.start(100)  # 每隔100毫秒更新一次
 
-        if players_ids != '' :
+        if allset.players_ids != '' :
             self.c = QtCore.QTimer(self)
             self.c.timeout.connect(self.setplayers)
             self.c.timeout.connect(self.hotsettime)
@@ -113,13 +85,13 @@ class Main(SplitFluentWindow):
 
 
 ########## 字体更新
-        self.ui.combo_box.currentTextChanged.connect(self.setfonta)
+        self.ui.combo_box.currentTextChanged.connect(lambda font: self.setfonta(font))
         self.ui.button1.clicked.connect(self.show_desktopLyric)
-        self.ui.pointSize.valueChanged.connect(self.button2)
-        self.ui.switchbold.checkedChanged.connect(self.setbold)
+        self.ui.pointSize.valueChanged.connect(lambda checked: self.setpointSize(checked))
+        self.ui.switchbold.checkedChanged.connect(lambda checked: self.setbold(checked))
         # self.ui.switchbold.checkedChanged.connect(self.hot)
-        self.ui.switchunderline.checkedChanged.connect(self.setunderline)
-        self.ui.button2.clicked.connect(self.showColorDialog)
+        self.ui.switchunderline.checkedChanged.connect(lambda checked: self.setunderline(checked))
+        self.ui.button2.clicked.connect(lambda checked: self.showColorDialog(checked))
 ######### 播放按钮控制
         self.ui1.bas.skipForwardButton.clicked.connect(self.next1)
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
@@ -129,7 +101,7 @@ class Main(SplitFluentWindow):
         self.ui.CheckBox1.clicked.connect(self.on_inTopCheckBox_clicked)
 
         self.desktopLyric = LyricLabel()
-        self.change_font()
+        change_font(self)
 #        self.update_pic()
 
 #        self.ui1.combo_box.currentTextChanged.connect(self.playerss)
@@ -166,116 +138,16 @@ class Main(SplitFluentWindow):
         self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
         if self.desktopLyric.isVisible():
             self.ui.CheckBox1.setChecked(False)
+            allset.lycl = 0
             self.desktopLyric.close()
         else:
+            allset.lycl = 1
             self.desktopLyric.show()
-########字体设置
-    def setbold(self, checked):
-        global bold
-        if checked:
-            bold = True
-            self.change_font()
-        else:
-            bold = False
-            self.change_font()
-
-    def setunderline(self, checked):
-        global underline
-        if checked:
-            underline = True
-            self.change_font()
-        else:
-            underline = False
-            self.change_font()
-
-    def button2(self):
-        global pointSize
-        pointSize = int(self.ui.pointSize.value())
-#        print(pointSize)
-        self.change_font()
-#####歌曲热评获取
-    def hotsettime(self):
-        global song_id
-        global song_id1
-        if song_id != song_id1 :
-            self.hotset()
-
-    def hotset(self):
-      global new_comments
-      self.hotget()
-      random_number = random.randint(1, 15)
-      aaaaa = random_number
-      for item in new_comments:
-          if "username_" + str(aaaaa) in item:
-              username = item["username_" + str(aaaaa) ]
-              hotcomments = item["hotcomments_" + str(aaaaa) ]
-              hotcomment = hotcomments.replace("\n", " ； ")
-              self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
-
-
-
-    def hotget(self):
-      global a
-      global song_id
-      global song_id1
-      global new_comments
-      song_id1 = song_id
-      comments = hotComments(song_id,a)
-      new_comments = []
-      for idx, comment in enumerate(comments, 1):
-            new_comment = {}
-            for key, value in comment.items():
-                new_key = f"{key}_{idx}"
-                new_value = value
-                new_comment[new_key] = new_value
-            new_comments.append(new_comment)
-
-    def showColorDialog(self):
-        global foncolor
-        # print(foncolor)
-        colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
-        colorset.setColor(QColor(foncolor), movePicker=True)
-        colorset.colorChanged.connect(lambda c: self.setcolor(c))
-        colorset.exec()
-
-# #
-    def setcolor(self,c):
-        global foncolor
-        foncolor = c.name()
-        self.change_font()
-
-
-    def setfonta(self,font):
-        global fonta
-        fonta = font
-        self.change_font()
-
-    def change_font(self):
-        global pointSize
-        global fonta
-        global bold
-        global underline
-        global foncolor
-        # 创建QFont对象
-        qfont = QFont(fonta)
-        qfont.setPointSize(pointSize)# 设置字体大小
-#        print(fonta)
-        qfont.setBold(bold)
-        qfont.setUnderline(underline)
-        self.ui.label.setStyleSheet("color:"+foncolor)
-        self.ui.label.setFont(qfont)
-        if self.desktopLyric.isVisible():
-            self.desktopLyric.setStyleSheet("color:"+foncolor)
-            self.desktopLyric.setFont(qfont)
-        else:
-            self.desktopLyric.setFont(qfont)
-
 
 ###############设置控制的播放器
 
     def setplayers(self):
-        global idss
-        mp = pympris.MediaPlayer(idss, bus)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
         aa = str(mp.root.Identity)
         self.ui1.combo_box.clear()
         self.ui1.combo_box.addItems(list(pympris.available_players()))
@@ -284,13 +156,12 @@ class Main(SplitFluentWindow):
 
 ##################歌词更新代码
     def update_label(self):
-        global song_id
         res = lyrics_backend.interface.getCurrentLyric(0)
         lyric = res.get('lyric', '')  # 如果 'lyric' 键不存在，返回空字符串
         tlyric = res.get('tlyric', '') # 如果 'lyric' 键不存在，返回空字符串
         status = res.get('status', '')
         asa = res.get('e', '正常')
-        song_id = asa
+        allset.song_id = asa
               ##读取歌词显示情况
         if self.desktopLyric.isVisible():
             self.ui.label3.setText(self.tr("歌词：已显示"))
@@ -317,15 +188,13 @@ class Main(SplitFluentWindow):
             self.ui.label.adjustSize()
             # print(res)
 
-####信息更新
+#############信息更新
     def update_a(self):
-        global picurl
-        global ddd
         res1 = requests.get("http://127.0.0.1:27232/player")
         res11 = json.loads(res1.text)
         res111 = res11["currentTrack"]
         res1111 = res111.get("position","")
-        ddd = res11["currentTrack"]["id"]
+        allset.ddd = res11["currentTrack"]["id"]
         if res1111 != "" :
             singername = res11["currentTrack"]["artists"][0]
             alname = res11["currentTrack"]["album"]["name"]
@@ -333,23 +202,20 @@ class Main(SplitFluentWindow):
         else:
             singername = res11["currentTrack"]["ar"][0]
             alname = res11["currentTrack"]["al"]["name"]
-            picurl = res11["currentTrack"]["al"]["picUrl"]
+            allset.picurl = res11["currentTrack"]["al"]["picUrl"]
         singername1 = singername.get('name', '')
         name = res111.get('name', '')
         self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
         self.ui1.label2.adjustSize()
 
-
+#####读取播放状态
     def updateplayer(self):
-        global trackid
-        global length
-        global playaa
-        global idss
-        mp = pympris.MediaPlayer(idss, bus)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
         playerdata = mp.player.Metadata
         data = playerdata
-        trackid = data.get('mpris:trackid', '')
+        allset.trackid = data.get('mpris:trackid', '')
         length = data.get('mpris:length', '')#####总时长
+        allset.length = data.get('mpris:length', '')#####总时长
         progress = mp.player.Position
         p = str(progress)
         l = str(length)
@@ -366,21 +232,18 @@ class Main(SplitFluentWindow):
         self.ui1.bas.play.setPlay(self.playaa)
         # print(self.playaa)
 
-
+########更新专辑图片
     def update_pic(self):
-          global picl
-          global ddd
-          if ddd != picl :
-              picl = ddd
+          if allset.ddd != allset.picl :
+              allset.picl = allset.ddd
               # print(picl)
               self.pica()
 
     def pica(self):
-        global picurl
         self.manager = QNetworkAccessManager(self)
         self.request = QNetworkRequest()
         self.request.CacheLoadControl.AlwaysNetwork
-        self.request.setUrl(picurl)
+        self.request.setUrl(allset.picurl)
         self.reply =  self.manager.get(self.request)
         self.reply.finished.connect(self.handle_image)# 将槽函数连接到响应信号
 
@@ -396,47 +259,155 @@ class Main(SplitFluentWindow):
         self.ui1.label_pic.setPixmap(pixmap)
         self.ui1.label_pic.setScaledContents(True)
 
-#############
+#############歌词显示按钮控制
     def button1(self):
         if self.desktopLyric.isVisible():
           self.ui.button1.setText(self.tr("关闭歌词"))
         else:
             self.ui.button1.setText(self.tr("显示歌词"))
-
+##########下一首控制
     def next1(self):
         global idss
-        mp = pympris.MediaPlayer(idss, bus)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.Next()
-
+#########上一首控制
     def ra(self):
-        global idss
-        mp = pympris.MediaPlayer(idss, bus)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.Previous()
-
+########播放暂停控制
     def playa(self):
-        global idss
-        mp = pympris.MediaPlayer(idss, bus)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.PlayPause()
-
+########获取播放状态
     def plaa(self, position: int):
-        global trackid
-        global idss
         append_num = "000000"
         str_num = str(position)
         str_append_num = str(append_num)
         new_str_num = str_num + str_append_num
         new_num = int(new_str_num)
-        mp = pympris.MediaPlayer(idss, bus)
-        mp.player.SetPosition(trackid,new_num)
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
+        mp.player.SetPosition(allset.trackid,new_num)
         self.ui1.bas.progressSlider.setValue(position)
         print(trackid,new_num)
-
+########设置播放id
     def playerss(self,abc):
-        global idss
         aa = str(abc)
-        idss = aa
+        allset.idss = aa
+
+#####歌曲热评获取
+    def hotsettime(self):
+        if allset.song_id != allset.song_id1 :
+            self.hotset()
+
+    def hotset(self):
+      self.hotget()
+      random_number = random.randint(1, 15)
+      aaaaa = random_number
+      for item in allset.new_comments:
+          if "username_" + str(aaaaa) in item:
+              username = item["username_" + str(aaaaa) ]
+              hotcomments = item["hotcomments_" + str(aaaaa) ]
+              hotcomment = hotcomments.replace("\n", " ； ")
+              self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
+
+    def hotget(self):
+      allset.song_id1 = allset.song_id
+      comments = hotComments(song_id,a)
+      allset.new_comments = []
+      for idx, comment in enumerate(comments, 1):
+            allset.new_comment = {}
+            for key, value in comment.items():
+                new_key = f"{key}_{idx}"
+                new_value = value
+                new_comment[new_key] = new_value
+            allset.new_comments.append(allset.new_comment)
+    #
+    # def showColorDialog(self):
+    #     global foncolor
+    #     # print(foncolor)
+    #     colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
+    #     colorset.setColor(QColor(foncolor), movePicker=True)
+    #     colorset.colorChanged.connect(lambda c: self.setcolor(c))
+    #     colorset.exec()
 
 app = QtWidgets.QApplication(sys.argv)
 window = Main()
 window.show()
+# 创建系统托盘图标对象
+tray_icon = QSystemTrayIcon()
+
+# 创建托盘图标菜单
+tray_menu = QMenu()
+action_show = QAction("显示应用程序")
+lyrics_show = QAction("显示歌词")
+action_quit = QAction("退出应用程序")
+
+# 添加菜单项到菜单
+tray_menu.addAction(action_show)
+tray_menu.addAction(lyrics_show)
+tray_menu.addAction(action_quit)
+
+# 将菜单设置到托盘图标
+tray_icon.setContextMenu(tray_menu)
+
+# 设置托盘图标的默认图标
+default_icon = QIcon("res/icons/GitHub.svg")
+tray_icon.setIcon(default_icon)
+
+# 设置托盘图标的鼠标提示
+tray_icon.setToolTip("这是一个自定义的系统托盘图标")
+
+
+def showDialog():
+    if window.isVisible():
+      title = '退出?'
+      content = """这将退出应用。"""
+      # w = MessageDialog(title, content, self)   # Win10 style message box
+      w = MessageBox(title, content, window)
+      if w.exec():
+          sys.exit(app.exec())
+    else:
+      window.show()
+      title = '退出?'
+      content = """这将退出应用。"""
+      # w = MessageDialog(title, content, self)   # Win10 style message box
+      w = MessageBox(title, content, window)
+      if w.exec():
+          sys.exit(app.exec())
+
+def showwindows():
+  if window.isVisible():
+    title = '应用已经打开了OvO?'
+    content = """呜呜呜呜"""
+    infobar = InfoBar.info(title, content)
+    infobar.setWindowFlags(Qt.FramelessWindowHint)
+    _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
+    # 初始化位置到右下角
+    infobar.move(_endPos)
+    infobar.show()
+  else:
+      window.show()
+
+def showlyrics():
+  global lycl
+  if lycl == 1 :
+    title = '歌词已经显示了OvO?'
+    content = """呜呜呜呜"""
+    infobar = InfoBar.info(title, content)
+    infobar.setWindowFlags(Qt.FramelessWindowHint)
+    _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
+    # 初始化位置到右下角
+    infobar.move(_endPos)
+    infobar.show()
+  else:
+    Main.show_desktopLyric(window)
+
+# 为退出应用程序添加监听器
+action_quit.triggered.connect(showDialog)
+# 为显示应用程序添加监听器
+action_show.triggered.connect(showwindows)
+lyrics_show.triggered.connect(showlyrics)
+# 在系统托盘中显示图标
+tray_icon.show()
+
 sys.exit(app.exec())
