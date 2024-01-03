@@ -389,8 +389,7 @@ def showwindows():
       window.show()
 
 def showlyrics():
-  global lycl
-  if lycl == 1 :
+  if allset.lycl == 1 :
     title = '歌词已经显示了OvO?'
     content = """呜呜呜呜"""
     infobar = InfoBar.info(title, content)
