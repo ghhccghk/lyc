@@ -26,7 +26,7 @@ from ui.aboueInterface_ui import aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 from module.hotcomments import hotComments
-from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,showColorDialog,change_font
+from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,change_font
 from module.audio import MyAudioPlayer
 # from module.systray import showlyrics,showwindows,showDialog
 
@@ -92,7 +92,7 @@ class Main(SplitFluentWindow):
         self.ui.switchbold.checkedChanged.connect(lambda checked: self.setbold(checked))
         # self.ui.switchbold.checkedChanged.connect(self.hot)
         self.ui.switchunderline.checkedChanged.connect(lambda checked: self.setunderline(checked))
-        self.ui.button2.clicked.connect(lambda checked: self.showColorDialog(checked))
+        self.ui.button2.clicked.connect(lambda checked: self.showColorDialog())
 ######### 播放按钮控制
         self.ui1.bas.skipForwardButton.clicked.connect(self.next1)
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
@@ -325,14 +325,14 @@ class Main(SplitFluentWindow):
                 new_value = value
                 allset.new_comment[new_key] = new_value
             allset.new_comments.append(allset.new_comment)
-    #
-    # def showColorDialog(self):
-    #     global foncolor
-    #     # print(foncolor)
-    #     colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
-    #     colorset.setColor(QColor(foncolor), movePicker=True)
-    #     colorset.colorChanged.connect(lambda c: self.setcolor(c))
-    #     colorset.exec()
+
+
+    def showColorDialog(self):
+        # print(foncolor)
+        colorset = ColorDialog(QColor(allset.foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
+        colorset.setColor(QColor(allset.foncolor), movePicker=True)
+        colorset.colorChanged.connect(lambda c: setcolor(self,c))
+        colorset.exec()
 
 app = QtWidgets.QApplication(sys.argv)
 window = Main()
@@ -383,7 +383,7 @@ def showwindows():
     MyAudioPlayer.play(MyAudioPlayer)
     title = '应用已经打开了OvO?'
     content = allset.tt
-    infobar = InfoBar.info(title, content)
+    infobar = InfoBar.info(title, content, duration=8000)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
     # 初始化位置到右下角
@@ -397,7 +397,7 @@ def showlyrics():
     MyAudioPlayer.play(MyAudioPlayer)
     title = '歌词已经显示了OvO?'
     content = allset.tt
-    infobar = InfoBar.info(title, content)
+    infobar = InfoBar.info(title, content, duration=8000)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
     # 初始化位置到右下角

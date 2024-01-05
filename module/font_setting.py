@@ -4,7 +4,9 @@ from PySide6.QtCore import Qt, QLocale, QObject,Signal,QUrl,QRect,QPoint
 from PySide6.QtGui import QFontDatabase,QFont,QIcon,QPixmap,QColor, QAction,QGuiApplication
 #######全局变量设置
 from module import allset
-
+#######qframelesswindow 引用
+from qframelesswindow import AcrylicWindow
+from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
 from ui.my_window_ui import LyricLabel
 
 # 字体设置
@@ -53,11 +55,3 @@ def change_font(self):
         self.desktopLyric.setFont(qfont)
     else:
         self.desktopLyric.setFont(qfont)
-
-def showColorDialog(self):
-    global foncolor
-    # print(foncolor)
-    colorset = ColorDialog(QColor(allset.foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
-    colorset.setColor(QColor(allset.foncolor), movePicker=True)
-    colorset.colorChanged.connect(lambda c: self.setcolor(c))
-    colorset.exec()
