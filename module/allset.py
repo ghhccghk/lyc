@@ -43,3 +43,7 @@ new_comments: str
 
 ######歌词显示全局通告
 lycl: str = 0
+
+tt:str
+
+status1:str

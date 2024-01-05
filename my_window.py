@@ -27,6 +27,8 @@ from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 from module.hotcomments import hotComments
 from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,showColorDialog,change_font
+from module.audio import MyAudioPlayer
+# from module.systray import showlyrics,showwindows,showDialog
 
 #########对接linux dbus 引用
 import gobject
@@ -78,7 +80,6 @@ class Main(SplitFluentWindow):
 
         if allset.players_ids != '' :
             self.c = QtCore.QTimer(self)
-            self.c.timeout.connect(self.setplayers)
             self.c.timeout.connect(self.hotsettime)
             self.c.start(1000)  # 每隔100毫秒更新一次
 
@@ -99,12 +100,13 @@ class Main(SplitFluentWindow):
         self.ui1.bas.progressSlider.sliderMoved.connect(self.plaa)
 #########置顶更新
         self.ui.CheckBox1.clicked.connect(self.on_inTopCheckBox_clicked)
+#########刷新播放器状态
+        self.ui1.button1.clicked.connect(self.setplayers)
+        self.ui1.combo_box.currentTextChanged.connect(self.playerss)
 
         self.desktopLyric = LyricLabel()
         change_font(self)
-#        self.update_pic()
-
-#        self.ui1.combo_box.currentTextChanged.connect(self.playerss)
+        self.setplayers()
 ###############窗口置顶
     def on_inTopCheckBox_clicked(self, checked):
         # print(checked)
@@ -176,12 +178,9 @@ class Main(SplitFluentWindow):
         if status == 414:
             self.ui.label.setText(lyric)
             self.desktopLyric.set_lyrics(lyric,tlyric)
-            self.ui.label9.setText(self.tr("当前歌曲ID：") + str(asa))
             self.ui.label.adjustSize()
-            self.ui.label9.adjustSize()
         else:
-            self.ui.label9.setText(self.tr("当前歌曲ID：" )+ str(asa))
-            self.ui.label9.adjustSize()
+
             # self.desktopLyric.set_lyrics("间奏或纯音乐，如遇歌词有但是显示这句话","请提交issue，歌曲id" + str(asa) )
             self.ui.label.setText(lyric + ' ' + tlyric)
             self.desktopLyric.set_lyrics(lyric,tlyric)
@@ -205,6 +204,8 @@ class Main(SplitFluentWindow):
             allset.picurl = res11["currentTrack"]["al"]["picUrl"]
         singername1 = singername.get('name', '')
         name = res111.get('name', '')
+        self.ui.label9.setText(self.tr("当前歌曲ID：" )+ str(allset.ddd))
+        self.ui.label9.adjustSize()
         self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
         self.ui1.label2.adjustSize()
 
@@ -288,12 +289,15 @@ class Main(SplitFluentWindow):
         mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.SetPosition(allset.trackid,new_num)
         self.ui1.bas.progressSlider.setValue(position)
-        print(trackid,new_num)
+        # print(allset.trackid,new_num)
 ########设置播放id
     def playerss(self,abc):
         aa = str(abc)
         allset.idss = aa
-
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
+        aaa = str(mp.root.Identity)
+        self.ui1.label4.setText(aaa)
+        self.ui1.label4.adjustSize()
 #####歌曲热评获取
     def hotsettime(self):
         if allset.song_id != allset.song_id1 :
@@ -335,7 +339,7 @@ window = Main()
 window.show()
 # 创建系统托盘图标对象
 tray_icon = QSystemTrayIcon()
-
+MyAudioPlayer()
 # 创建托盘图标菜单
 tray_menu = QMenu()
 action_show = QAction("显示应用程序")
@@ -357,7 +361,6 @@ tray_icon.setIcon(default_icon)
 # 设置托盘图标的鼠标提示
 tray_icon.setToolTip("这是一个自定义的系统托盘图标")
 
-
 def showDialog():
     if window.isVisible():
       title = '退出?'
@@ -377,8 +380,9 @@ def showDialog():
 
 def showwindows():
   if window.isVisible():
+    MyAudioPlayer.play(MyAudioPlayer)
     title = '应用已经打开了OvO?'
-    content = """呜呜呜呜"""
+    content = allset.tt
     infobar = InfoBar.info(title, content)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
@@ -386,12 +390,13 @@ def showwindows():
     infobar.move(_endPos)
     infobar.show()
   else:
-      window.show()
+    window.show()
 
 def showlyrics():
   if allset.lycl == 1 :
+    MyAudioPlayer.play(MyAudioPlayer)
     title = '歌词已经显示了OvO?'
-    content = """呜呜呜呜"""
+    content = allset.tt
     infobar = InfoBar.info(title, content)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
@@ -400,12 +405,15 @@ def showlyrics():
     infobar.show()
   else:
     Main.show_desktopLyric(window)
+    allset.lycl = 1
+
 
 # 为退出应用程序添加监听器
 action_quit.triggered.connect(showDialog)
 # 为显示应用程序添加监听器
 action_show.triggered.connect(showwindows)
 lyrics_show.triggered.connect(showlyrics)
+
 # 在系统托盘中显示图标
 tray_icon.show()
 

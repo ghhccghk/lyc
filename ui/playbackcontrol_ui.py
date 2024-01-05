@@ -57,24 +57,14 @@ class playbackcontrol(ScrollArea):
         image = QPixmap(os.path.join(basedir, "../res/icons/108.png"))
         self.label_pic.setPixmap(image)
         self.label_pic.setScaledContents(True)
-
-        self.combo_box = ComboBox(self)####qfluentwidgets拿过来魔改
-        self.combo_box.move(120, 600)
-        self.combo_box.resize(240, 30)
-
-#######控件
-#        self.button0 = ToolButton(self)
-#        self.button0.setIcon(FluentIcon.PLAY)
- #       self.button0.move(220, 500)
-
-        # self.button1 = ToolButton(self)
-        # self.button1.setIcon(QIcon(os.path.join(basedir,"res/icons/上一首.png")))
-        # self.button1.move(175, 500)
-
-        # self.button2 = ToolButton(self)
-        # self.button2.setIcon(QIcon(os.path.join(basedir,"res/icons/下一首.png")))
-        # self.button2.move(265, 500)
-
+#######播放器选择
+        self.combo_box = ComboBox(self)
+        self.combo_box.move(130, 600)
+        self.combo_box.resize(100, 30)
+######刷新播放器状态
+        self.button1 = PushButton(self.tr("更新列表"), self)
+        self.button1.move(240, 600)
+##########控件
         self.bas = SimpleMediaPlayBar(self)
         self.bas.move(95, 450)
         self.bas.resize(300, 250)
