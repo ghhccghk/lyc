@@ -4,6 +4,8 @@ import gobject
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 import pympris
+from PySide6.QtWidgets import QApplication, QMessageBox
+import sys
 
 status: int
 id: int
@@ -24,6 +26,16 @@ ids = 0
 dbus_loop = DBusGMainLoop()
 bus = dbus.SessionBus(mainloop=dbus_loop)
 players_ids = list(pympris.available_players())
+if not players_ids:
+    app = QApplication(sys.argv)
+    msg_box = QMessageBox()
+    msg_box.setIcon(QMessageBox.Critical)
+    msg_box.setText("没有启动任何播放器.")
+    msg_box.setInformativeText("即将退出程序.")
+    msg_box.setWindowTitle("错误")
+    msg_box.exec_()  # 隐藏主窗口
+    sys.exit()
+
 picl: str = 0
 picurl: str
 ddd: str

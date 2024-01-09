@@ -19,6 +19,8 @@ from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRe
 from qframelesswindow import AcrylicWindow
 from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
 
+import time
+
 #####其他py文件引用
 from ui.my_window_ui import MyWindowUI,LyricLabel
 from ui.playbackcontrol_ui import playbackcontrol
@@ -26,7 +28,7 @@ from ui.aboueInterface_ui import aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 from module.hotcomments import hotComments
-from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,change_font
+# from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,change_font
 from module.audio import MyAudioPlayer
 # from module.systray import showlyrics,showwindows,showDialog
 
@@ -38,7 +40,13 @@ import pympris
 
 #######全局变量设置
 from module import allset
-
+#####默认字体变量
+fonta: str = "文泉驿等宽微米黑"  ###字体
+bold: bool = True  ####粗细
+underline: bool = False #####下划线
+pointSize: int = 20.22  ###字号
+foncolor: str = "00000000" ####黑色
+ids = 0
 #debug使用
 #faulthandler.enable()
 basedir = os.path.dirname(__file__)
@@ -86,13 +94,13 @@ class Main(SplitFluentWindow):
 
 
 ########## 字体更新
-        self.ui.combo_box.currentTextChanged.connect(lambda font: self.setfonta(font))
+        self.ui.combo_box.currentTextChanged.connect(self.setfonta)
         self.ui.button1.clicked.connect(self.show_desktopLyric)
-        self.ui.pointSize.valueChanged.connect(lambda checked: self.setpointSize(checked))
-        self.ui.switchbold.checkedChanged.connect(lambda checked: self.setbold(checked))
+        self.ui.pointSize.valueChanged.connect(self.button2)
+        self.ui.switchbold.checkedChanged.connect(self.setbold)
         # self.ui.switchbold.checkedChanged.connect(self.hot)
-        self.ui.switchunderline.checkedChanged.connect(lambda checked: self.setunderline(checked))
-        self.ui.button2.clicked.connect(lambda checked: self.showColorDialog())
+        self.ui.switchunderline.checkedChanged.connect(self.setunderline)
+        self.ui.button2.clicked.connect(self.showColorDialog)
 ######### 播放按钮控制
         self.ui1.bas.skipForwardButton.clicked.connect(self.next1)
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
@@ -105,7 +113,7 @@ class Main(SplitFluentWindow):
         self.ui1.combo_box.currentTextChanged.connect(self.playerss)
 
         self.desktopLyric = LyricLabel()
-        change_font(self)
+        self.change_font()
         self.setplayers()
 ###############窗口置顶
     def on_inTopCheckBox_clicked(self, checked):
@@ -145,6 +153,71 @@ class Main(SplitFluentWindow):
         else:
             allset.lycl = 1
             self.desktopLyric.show()
+
+########字体设置
+    def setbold(self, checked):
+        global bold
+        if checked:
+            bold = True
+            self.change_font()
+        else:
+            bold = False
+            self.change_font()
+
+    def setunderline(self, checked):
+        global underline
+        if checked:
+            underline = True
+            self.change_font()
+        else:
+            underline = False
+            self.change_font()
+
+    def button2(self):
+        global pointSize
+        pointSize = int(self.ui.pointSize.value())
+#        print(pointSize)
+        self.change_font()
+
+    def showColorDialog(self):
+        global foncolor
+        # print(foncolor)
+        colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
+        colorset.setColor(QColor(foncolor), movePicker=True)
+        colorset.colorChanged.connect(lambda c: self.setcolor(c))
+        colorset.exec()
+
+    def setcolor(self,c):
+        global foncolor
+        foncolor = c.name()
+        self.change_font()
+
+
+    def setfonta(self,font):
+        global fonta
+        fonta = font
+        self.change_font()
+
+    def change_font(self):
+        global pointSize
+        global fonta
+        global bold
+        global underline
+        global foncolor
+        # 创建QFont对象
+        qfont = QFont(fonta)
+        qfont.setPointSize(pointSize)# 设置字体大小
+#        print(fonta)
+        qfont.setBold(bold)
+        qfont.setUnderline(underline)
+        self.ui.label.setStyleSheet("color:"+foncolor)
+        self.ui.label.setFont(qfont)
+        if self.desktopLyric.isVisible():
+            self.desktopLyric.setStyleSheet("color:"+foncolor)
+            self.desktopLyric.setFont(qfont)
+        else:
+            self.desktopLyric.setFont(qfont)
+
 
 ###############设置控制的播放器
 
@@ -197,7 +270,7 @@ class Main(SplitFluentWindow):
         if res1111 != "" :
             singername = res11["currentTrack"]["artists"][0]
             alname = res11["currentTrack"]["album"]["name"]
-            picurl = res11["currentTrack"]["album"]["blurPicUrl"]
+            allset.picurl = res11["currentTrack"]["album"]["blurPicUrl"]
         else:
             singername = res11["currentTrack"]["ar"][0]
             alname = res11["currentTrack"]["al"]["name"]
@@ -300,12 +373,27 @@ class Main(SplitFluentWindow):
         self.ui1.label4.adjustSize()
 #####歌曲热评获取
     def hotsettime(self):
+        time.sleep(0.1)###由于代码执行速度原因添加。
         if allset.song_id != allset.song_id1 :
             self.hotset()
 
     def hotset(self):
       self.hotget()
-      random_number = random.randint(1, 15)
+      data = []
+      comments = allset.new_comments
+      for idx, comment in enumerate(comments, 1):
+            data1 = {}
+            for key, value in comment.items():
+                new_key = f"{idx}"
+                new_value = value
+                data1[new_key] = new_value
+            data.append(data1)
+      all_keys = self.outkey(data)
+
+      numeric_values = [int(key) for key in all_keys]  # 如果包含浮点数可以使用 float(key) 来转换
+      max_numeric = max(numeric_values, default=None)
+      min_numeric = min(numeric_values, default=None)
+      random_number = random.randint(min_numeric, max_numeric)
       aaaaa = random_number
       for item in allset.new_comments:
           if "username_" + str(aaaaa) in item:
@@ -314,7 +402,25 @@ class Main(SplitFluentWindow):
               hotcomment = hotcomments.replace("\n", " ； ")
               self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
 
+    def outkey(self,content) -> tuple:
+        data = content
+        # 提取数字的正则表达式
+        pattern = r'\d+'
+
+        # 存储提取到的数字
+        keys = []
+
+        # 遍历每个字典
+        for item in data:
+        # 提取键中的数字部分
+            match = re.search(pattern, next(iter(item)))
+            if match:
+              keys.append(int(match.group()))
+        return keys
+
+
     def hotget(self):
+      ######json添加数字
       allset.song_id1 = allset.song_id
       comments = hotComments(allset.song_id,allset.a)
       allset.new_comments = []
@@ -326,13 +432,6 @@ class Main(SplitFluentWindow):
                 allset.new_comment[new_key] = new_value
             allset.new_comments.append(allset.new_comment)
 
-
-    def showColorDialog(self):
-        # print(foncolor)
-        colorset = ColorDialog(QColor(allset.foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
-        colorset.setColor(QColor(allset.foncolor), movePicker=True)
-        colorset.colorChanged.connect(lambda c: setcolor(self,c))
-        colorset.exec()
 
 app = QtWidgets.QApplication(sys.argv)
 window = Main()
@@ -383,7 +482,7 @@ def showwindows():
     MyAudioPlayer.play(MyAudioPlayer)
     title = '应用已经打开了OvO?'
     content = allset.tt
-    infobar = InfoBar.info(title, content, duration=8000)
+    infobar = InfoBar.info(title, content, duration=4000)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
     # 初始化位置到右下角
@@ -397,7 +496,7 @@ def showlyrics():
     MyAudioPlayer.play(MyAudioPlayer)
     title = '歌词已经显示了OvO?'
     content = allset.tt
-    infobar = InfoBar.info(title, content, duration=8000)
+    infobar = InfoBar.info(title, content, duration=4000)
     infobar.setWindowFlags(Qt.FramelessWindowHint)
     _endPos = QPoint(QGuiApplication.primaryScreen().geometry().width() - infobar.width() - 20  ,  QGuiApplication.primaryScreen().geometry().height() - infobar.height() - 70 )
     # 初始化位置到右下角
