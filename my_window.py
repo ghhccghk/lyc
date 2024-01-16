@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QSystemTrayIcon,QMenu, QMessageBox,QApplication
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 #######qframelesswindow 引用
 from qframelesswindow import AcrylicWindow
-from qfluentwidgets import SplitFluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
+from qfluentwidgets import FluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
 
 import time
 
@@ -28,9 +28,7 @@ from ui.aboueInterface_ui import aboueInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 from module.hotcomments import hotComments
-# from module.font_setting import setbold,setunderline,setpointSize,setcolor,setfonta,change_font
 from module.audio import MyAudioPlayer
-# from module.systray import showlyrics,showwindows,showDialog
 
 #########对接linux dbus 引用
 import gobject
@@ -40,6 +38,16 @@ import pympris
 
 #######全局变量设置
 from module import allset
+
+from NeteaseCloudMusic import NeteaseCloudMusicApi, api_help, api_list
+import os
+
+# netease_cloud_music_api = NeteaseCloudMusicApi()  # 初始化API
+# # netease_cloud_music_api.cookie = "003A959854B58FE9A9730D6A043D0E703F1726CEF413151C220DD56933B2596E4C602D350A23DD64E70339701D36D169E11CDED10A3CDDB9BBA7D55A0D0536D722D2A4C8D61B1295FED3396AC1C0C04A9893DADCCC5EE1B76F7CE518FC9BA82A033179AF074238D6082BD3E50F167B95D9FB158F5AE1322BE74FC266DB4EF0739730141AE8E0E9B06A275BD8D1F852EAF5ED6EE792F4B449CAEBE4FA09F4B67B89F07A860F1E011B2FC6BB12CFDF9F896A786CB041B654146C9431C0980D6447AB9F9B246A3A0B6BE0776632F0CC57148F9174911FE85A2CEB4FBE4F7A096A326721FBF61558482C9E42EDD708D26CF6DCD62CD9D370A5BD348B436E864A8EE18967EAE4D099B205F66FF821280A7689D816D4B1D2E268EADCADB1E298866C05D507489845CC48728886048349BD06B5C4D58D22FE2E25766EF8320B12630E8150601568DE637C5FEE661744D638DDF470"  # 设置cookie， 如果没有cookie需要先登录 具体见example.py
+# response = netease_cloud_music_api.request("cloudsearch", {"keywords":"海阔天空","limit": "1"})  # 调用API
+#
+# # 获取帮助
+# print(response)
 #####默认字体变量
 fonta: str = "文泉驿等宽微米黑"  ###字体
 bold: bool = True  ####粗细
@@ -48,15 +56,15 @@ pointSize: int = 20.22  ###字号
 foncolor: str = "00000000" ####黑色
 ids = 0
 #debug使用
-#faulthandler.enable()
+faulthandler.enable()
 basedir = os.path.dirname(__file__)
 
 
-class Main(SplitFluentWindow):
+class Main(FluentWindow):
     global font,bold,underline,pointSize
-    def __init__(self, minWidth=590, minHeight=650):
+    def __init__(self, minWidth=750, minHeight=650):
         super().__init__()
-        self.resize(570,650)
+        self.resize(750,650)
         self.ui = MyWindowUI(sizeHintdb=(minWidth, minHeight), parent=self)
         self.ui1 = playbackcontrol(sizeHintdb=(minWidth, minHeight), parent=self)
         self.aboueInterface = aboueInterface(sizeHintdb=(minWidth, minHeight), parent=self)
@@ -93,21 +101,20 @@ class Main(SplitFluentWindow):
 
 
 
-########## 字体更新
-        self.ui.combo_box.currentTextChanged.connect(self.setfonta)
-        self.ui.button1.clicked.connect(self.show_desktopLyric)
-        self.ui.pointSize.valueChanged.connect(self.button2)
-        self.ui.switchbold.checkedChanged.connect(self.setbold)
-        # self.ui.switchbold.checkedChanged.connect(self.hot)
-        self.ui.switchunderline.checkedChanged.connect(self.setunderline)
-        self.ui.button2.clicked.connect(self.showColorDialog)
+# ########## 字体更新
+        self.ui.fontCard.currentTextChanged.connect(self.setfonta)
+        self.ui.showlycCard.clicked.connect(self.show_desktopLyric)
+        self.ui.fontsizeCard.valueChanged.connect(self.fontsize)
+        self.ui.boldCard.checkedChanged.connect(self.setbold)
+        self.ui.switchunderlineCard.checkedChanged.connect(self.setunderline)
+        self.ui.setcolorCard.clicked.connect(self.showColorDialog)
 ######### 播放按钮控制
         self.ui1.bas.skipForwardButton.clicked.connect(self.next1)
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
         self.ui1.bas.play.clicked.connect(self.playa)
         self.ui1.bas.progressSlider.sliderMoved.connect(self.plaa)
 #########置顶更新
-        self.ui.CheckBox1.clicked.connect(self.on_inTopCheckBox_clicked)
+        self.ui.showlyctopCard.checkedChanged.connect(self.on_inTopCheckBox_clicked)
 #########刷新播放器状态
         self.ui1.button1.clicked.connect(self.setplayers)
         self.ui1.combo_box.currentTextChanged.connect(self.playerss)
@@ -143,16 +150,6 @@ class Main(SplitFluentWindow):
                              self.tr('关于'),
                              NavigationItemPosition.BOTTOM)
 
-##########控制歌词显示代码
-    def show_desktopLyric(self):
-        self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
-        if self.desktopLyric.isVisible():
-            self.ui.CheckBox1.setChecked(False)
-            allset.lycl = 0
-            self.desktopLyric.close()
-        else:
-            allset.lycl = 1
-            self.desktopLyric.show()
 
 ########字体设置
     def setbold(self, checked):
@@ -173,9 +170,9 @@ class Main(SplitFluentWindow):
             underline = False
             self.change_font()
 
-    def button2(self):
+    def fontsize(self):
         global pointSize
-        pointSize = int(self.ui.pointSize.value())
+        pointSize = int(self.ui.fontsizeCard.value())
 #        print(pointSize)
         self.change_font()
 
@@ -217,6 +214,17 @@ class Main(SplitFluentWindow):
             self.desktopLyric.setFont(qfont)
         else:
             self.desktopLyric.setFont(qfont)
+##########控制歌词显示代码
+    def show_desktopLyric(self):
+        self.desktopLyric.set_lyrics(self.tr('这是一首很长的歌词'),self.tr('需要滚动显示'))
+        if self.desktopLyric.isVisible():
+            self.ui.showlyctopCard.setChecked(False)
+            allset.lycl = 0
+            self.desktopLyric.close()
+        else:
+            allset.lycl = 1
+            self.desktopLyric.setStyleSheet("color:"+foncolor)
+            self.desktopLyric.show()
 
 
 ###############设置控制的播放器
@@ -239,11 +247,11 @@ class Main(SplitFluentWindow):
         allset.song_id = asa
               ##读取歌词显示情况
         if self.desktopLyric.isVisible():
-            self.ui.label3.setText(self.tr("歌词：已显示"))
-            self.ui.label3.adjustSize()
+            self.ui.label3.setText(self.tr("歌词已显示，"))
+            # self.ui.label3.adjustSize()
         else:
-            self.ui.label3.setText(self.tr("歌词：未显示"))
-            self.ui.label3.adjustSize()
+            self.ui.label3.setText(self.tr("歌词未显示，"))
+            # self.ui.label3.adjustSize()
         # if status == 200 :
 
 #        print(singername)
@@ -278,9 +286,9 @@ class Main(SplitFluentWindow):
         singername1 = singername.get('name', '')
         name = res111.get('name', '')
         self.ui.label9.setText(self.tr("当前歌曲ID：" )+ str(allset.ddd))
-        self.ui.label9.adjustSize()
+        # self.ui.label9.adjustSize()
         self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
-        self.ui1.label2.adjustSize()
+        # self.ui1.label2.adjustSize()
 
 #####读取播放状态
     def updateplayer(self):
@@ -336,9 +344,9 @@ class Main(SplitFluentWindow):
 #############歌词显示按钮控制
     def button1(self):
         if self.desktopLyric.isVisible():
-          self.ui.button1.setText(self.tr("关闭歌词"))
+            self.ui.showlycCard.setText(self.tr("关闭歌词"))
         else:
-            self.ui.button1.setText(self.tr("显示歌词"))
+            self.ui.showlycCard.setText(self.tr("显示歌词"))
 ##########下一首控制
     def next1(self):
         global idss
@@ -400,7 +408,8 @@ class Main(SplitFluentWindow):
               username = item["username_" + str(aaaaa) ]
               hotcomments = item["hotcomments_" + str(aaaaa) ]
               hotcomment = hotcomments.replace("\n", " ； ")
-              self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
+              # self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
+              self.ui.testcard.set_hot_content("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
 
     def outkey(self,content) -> tuple:
         data = content
@@ -515,5 +524,4 @@ lyrics_show.triggered.connect(showlyrics)
 
 # 在系统托盘中显示图标
 tray_icon.show()
-
 sys.exit(app.exec())
