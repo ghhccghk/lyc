@@ -18,6 +18,8 @@ from qfluentwidgets.components.widgets.switch_button import SwitchButton, Indica
 from qfluentwidgets.common.icon import FluentIconBase
 from qfluentwidgets.common.config import qconfig, isDarkTheme, ConfigItem, OptionsConfigItem
 
+from module.widget import hotWidget, ComboBoxCard,SpinBoxCard,PushCard,SwitchCard,LyricLabel
+
 import qfluentwidgets
 import os
 
@@ -84,7 +86,7 @@ class MyWindowUI(ScrollArea):
         self.setting = SettingCardGroup(self.tr('歌词效果设置'), self.scrollWidget)
 
         self.fontCard = ComboBoxCard(
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            FIF.FONT,
             self.tr('字体设置'),
             self.tr('设置歌词的字体'),
             self.setting
@@ -100,7 +102,7 @@ class MyWindowUI(ScrollArea):
 
 
         self.boldCard = SwitchCard(
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            QIcon(os.path.join(basedir, '../res/icons/粗·.svg')),
             self.tr('字体加粗'),
             self.tr('设置歌词是否加粗'),
             # None,
@@ -114,7 +116,7 @@ class MyWindowUI(ScrollArea):
 
 
         self.switchunderlineCard = SwitchCard(
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            QIcon(os.path.join(basedir, '../res/icons/下划.svg')),
             self.tr('字体加下划线'),
             self.tr('设置歌词是否加下划线'),
             # None,
@@ -127,7 +129,7 @@ class MyWindowUI(ScrollArea):
 
         self.setcolorCard = PushCard(
             self.tr('设置字体颜色'),
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            FIF.PALETTE,
             self.tr('字体颜色'),
             self.tr('修改歌词字体颜色'),
             self.setting
@@ -148,7 +150,7 @@ class MyWindowUI(ScrollArea):
 
 
         self.showlyctopCard = SwitchCard(
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            FIF.UP,
             self.tr('歌词置顶'),
             self.tr('设置歌词是否置顶'),
             # None,
@@ -161,7 +163,7 @@ class MyWindowUI(ScrollArea):
 
         self.showlycCard = PushCard(
             self.tr('显示歌词'),
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            FIF.VIEW,
             self.tr('显示歌词'),
             self.tr('设置歌词是否显示在独立窗口'),
             self.setting
@@ -227,296 +229,5 @@ class MyWindowUI(ScrollArea):
         self.setWordWrap(True)  # 设置 label 可以换行
         height = self.fontMetrics().boundingRect(0, 0, width, 0, self.wordWrap()).height()
         return height
-
-
-class ComboBoxCard(SettingCard):
-    """ Setting card with switch button """
-
-    currentTextChanged = Signal(str)
-
-    def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None,
-                  parent=None,):
-        """
-        Parameters
-        ----------
-        icon: str | QIcon | FluentIconBase
-            the icon to be drawn
-
-        title: str
-            the title of card
-
-        content: str
-            the content of card
-
-        parent: QWidget
-            parent widget
-
-        OnText: "On"
-          设置打开按钮文本
-        """
-
-        super().__init__(icon, title, content, parent)
-        # self.configItem = configItem
-        self.ComboBox = ComboBox()
-
-        # add SpinBox to layout
-        self.hBoxLayout.addWidget(self.ComboBox, 0, Qt.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-
-        self.ComboBox.currentTextChanged.connect(self.__oncurrentTextChanged)
-
-    def __oncurrentTextChanged(self, isChecked: str):
-        """ switch button checked state changed slot """
-        self.currentTextChanged.emit(isChecked)
-
-    def addItem(self, Item: str):
-        self.ComboBox.addItem(Item)
-
-    def setCurrentIndex(self, CurrentIndex: int):
-        self.ComboBox.setCurrentIndex(CurrentIndex)
-
-class SpinBoxCard(SettingCard):
-    """ Setting card with switch button """
-
-    valueChanged = Signal(int)
-
-    def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None,
-                  parent=None,):
-        """
-        Parameters
-        ----------
-        icon: str | QIcon | FluentIconBase
-            the icon to be drawn
-
-        title: str
-            the title of card
-
-        content: str
-            the content of card
-
-        parent: QWidget
-            parent widget
-
-        OnText: "On"
-          设置打开按钮文本
-        """
-
-        super().__init__(icon, title, content, parent)
-        # self.configItem = configItem
-        self.SpinBox = SpinBox()
-
-        # add SpinBox to layout
-        self.hBoxLayout.addWidget(self.SpinBox, 0, Qt.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-
-        self.SpinBox.valueChanged.connect(self.__onvalueChanged)
-
-    def __onvalueChanged(self, isChecked: int):
-        """ switch button checked state changed slot """
-        self.valueChanged.emit(isChecked)
-
-    def setValue(self, Value: int):
-        self.SpinBox.setValue(Value)
-
-    def setSuffix(self, Value: str):
-        self.SpinBox.setSuffix(Value)
-
-    def setSingleStep(self, SingleStep: int):
-        self.SpinBox.setSingleStep(SingleStep)
-
-    def setWrapping(self,Wrapping: bool):
-        self.SpinBox.setWrapping(Wrapping)
-
-    def setRange(self,mins: int,miax: int):
-        self.SpinBox.setRange(mins,miax)
-
-    def value(self):
-        return self.SpinBox.value()
-
-class PushCard(SettingCard):
-    """ Setting card with a push button """
-
-    clicked = Signal()
-
-    def __init__(self, text, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
-        """
-        Parameters
-        ----------
-
-        icon: str | QIcon | FluentIconBase
-            the icon to be drawn
-
-        title: str
-            the title of card
-
-        content: str
-            the content of card
-
-        parent: QWidget
-            parent widget
-        """
-        super().__init__(icon, title, content, parent)
-        self.button = QPushButton(text, self)
-        self.hBoxLayout.addWidget(self.button, 0, Qt.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-        self.button.clicked.connect(self.clicked)
-
-    def setText(self,text):
-        self.button.setText(text)
-
-class SwitchCard(SettingCard):
-    """ Setting card with switch button """
-
-    checkedChanged = Signal(bool)
-
-    def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None,
-                  parent=None, OnText = "On",OffText = "Off"):
-        """
-        Parameters
-        ----------
-        icon: str | QIcon | FluentIconBase
-            the icon to be drawn
-
-        title: str
-            the title of card
-
-        content: str
-            the content of card
-
-        parent: QWidget
-            parent widget
-
-        OnText: "On"
-          设置打开按钮文本
-        """
-        super().__init__(icon, title, content, parent)
-        # self.configItem = configItem
-        self.switchButton = SwitchButton()
-        # self.switchButton.setChecked(Checked)
-        self.switchButton.setOnText(OnText)
-        self.switchButton.setOffText(OffText)
-
-        #
-        # if configItem:
-        #     self.setValue(qconfig.get(configItem))
-        #     configItem.valueChanged.connect(self.setValue)
-
-        # add switch button to layout
-        self.hBoxLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
-        self.hBoxLayout.addSpacing(16)
-
-        self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
-
-    def __onCheckedChanged(self, isChecked: bool):
-        """ switch button checked state changed slot """
-        self.setValue(isChecked)
-        self.checkedChanged.emit(isChecked)
-
-    def setValue(self, isChecked: bool):
-        # if self.configItem:
-        #     qconfig.set(self.configItem, isChecked)
-
-        self.switchButton.setChecked(isChecked)
-
-    def setChecked(self, isChecked: bool):
-        self.setValue(isChecked)
-
-    def isChecked(self):
-        return self.switchButton.isChecked()
-
-class hotWidget(QWidget):
-    def __init__(self, parent=None):
-        super(hotWidget, self).__init__(parent)
-
-        # 创建 QLabel 用于热评
-        self.name_label = QLabel(self)
-
-        # 设置字体样式
-        name_font = QFont()
-        name_font.setPointSize(15)
-        name_font.setBold(True)
-        self.name_label.setFont(name_font)
-        self.name_label.setWordWrap(True)
-        self.name_label.setText("test 测试文字test")
-
-        # 设置布局
-        layout = QHBoxLayout(self)
-        # 创建垂直布局用于放置名称和简介以及上下伸缩
-        info_layout = QVBoxLayout()
-        info_layout.addStretch()  # 添加顶部垂直伸缩
-        info_layout.addWidget(self.name_label)
-        info_layout.addStretch()  # 添加底部垂直伸缩
-
-        layout.addSpacing(10)
-        layout.addLayout(info_layout)
-        layout.addSpacing(10)
-
-    def set_hot_content(self, hot):
-        self.name_label.setText(hot)
-
-class LyricLabel(QLabel):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowFlags(Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.lyric1 = ''
-        self.lyric2 = ''
-#
-    ###读取歌词
-    def set_lyrics(self, lyric1, lyric2):
-        self.lyric1 = lyric1
-        self.lyric2 = lyric2
-        self.update_lyric()
-
-    ###歌词显示
-    def update_lyric(self):
-        self.setAlignment(Qt.AlignCenter)
-        if  self.lyric1 == ""  :
-            self.setText(" ")
-        else:
-            self.update_lyric1()
-
-    def update_lyric1(self):
-        if  self.lyric2 == ""  :
-            self.setText(self.lyric1)
-            self.adjustSize()
-        else:
-            self.setText(self.lyric1+'\n'+ self.lyric2)
-            self.adjustSize()
-
-    ###歌词动画 废弃
-    def start_scroll_animation(self):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.scroll_lyric)
-        self.timer.start(300)
-
-
-    ###歌词滚动 废弃
-    def scroll_lyric(self):
-        if len(self.lyric1) > 0 and len(self.lyric2) > 0:
-            self.lyric1 = self.lyric1[1:] + self.lyric1[0]
-            self.lyric2 = self.lyric2[1:] + self.lyric2[0]
-            self.setText(self.lyric1 + '\n' + self.lyric2)
-        else:
-            self.timer.stop()
-
-
-    ###鼠标行为
-    def mousePressEvent(self, e):
-        global ismoving
-        if e.button() == Qt.LeftButton:
-            self.ismoving = ismoving
-            self.start_point = e.globalPos()
-            self.window_point = self.frameGeometry().topLeft()
-
-    def mouseMoveEvent(self, e):
-        global ismoving
-        self.ismoving = ismoving
-        if self.ismoving:
-            relpos = e.globalPos() - self.start_point  # QPoint 类型可以直接相减
-            self.move(self.window_point + relpos)      # 所以说 Qt 真是赞！
-
-    # def mouseReleaseEvent(self, e):
-        # self.ismoving = False
 
 

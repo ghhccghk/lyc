@@ -13,6 +13,8 @@ from qfluentwidgets import ScrollArea
 from qfluentwidgets import FluentIcon as FIF
 import os
 
+from module.widget import ImageWidget
+
 basedir = os.path.dirname(__file__)
 
 
@@ -106,83 +108,3 @@ class aboueInterface(ScrollArea):
         theme = 'light' #if isDarkTheme() else 'light'
         with open(os.path.join(basedir, '../res/icons/system/qss/', theme, 'setting_interface.qss'), encoding='utf-8') as f:
             self.setStyleSheet(f.read())
-
-class ImageWidget(QWidget):
-    def __init__(self, image_path, app_name, app_description, max_height, parent=None):
-        super(ImageWidget, self).__init__(parent)
-
-        # 保存期望的最大高度
-        # self.max_height = max_height
-
-        # 创建一个 QLabel 用于显示图片
-        self.image_label = QLabel(self)
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setMaximumSize(max_height, max_height)
-
-
-        # 创建 QLabel 用于显示应用程序名称和简介
-        self.name_label = QLabel(app_name, self)
-        self.description_label = QLabel(app_description, self)
-
-        # 设置字体样式
-        name_font = QFont()
-        name_font.setPointSize(20)
-        name_font.setBold(True)
-        self.name_label.setFont(name_font)
-
-
-        description_font = QFont()
-        description_font.setPointSize(10)
-        self.description_label.setFont(description_font)
-        # 设置自动换行
-        self.description_label.setWordWrap(True)
-
-        # 设置布局
-        layout = QHBoxLayout(self)
-
-        # 添加图片左侧的水平伸缩
-        layout.addStretch()
-
-        # 创建垂直布局用于放置名称和简介以及上下伸缩
-        info_layout = QVBoxLayout()
-        info_layout.addStretch()  # 添加顶部垂直伸缩
-        info_layout.addWidget(self.name_label)
-        info_layout.addStretch()
-        info_layout.addWidget(self.description_label)
-        info_layout.addStretch()  # 添加底部垂直伸缩
-
-        layout.addWidget(self.image_label)
-        layout.addSpacing(75)
-        layout.addLayout(info_layout)
-        # 添加图片右侧的水平伸缩
-        layout.addStretch()
-
-        # 加载并显示图片
-        self.load_image(image_path)
-
-    def load_image(self, image_path):
-        # 通过 QPixmap 加载图片
-        pixmap = QPixmap(image_path)
-
-        # 在 QLabel 中显示图片
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setScaledContents(True)
-
-    # def resizeEvent(self, event):
-    #     # 在小部件大小发生变化时调用此方法
-    #     super(ImageWidget, self).resizeEvent(event)
-    #
-    #     # 获取新的小部件大小
-    #     new_size = event.size()
-    #
-    #     # 限制小部件的高度
-    #     new_height = min(self.max_height, new_size.height())
-    #     new_size.setHeight(new_height)
-    #
-    #     # 获取当前图片
-    #     current_pixmap = self.image_label.pixmap()
-    #
-    #     if current_pixmap:
-    #         # 缩放图片以适应新的小部件大小
-    #         scaled_pixmap = current_pixmap.scaled(new_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-    #         self.image_label.setPixmap(scaled_pixmap)
