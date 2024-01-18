@@ -17,6 +17,10 @@ from qfluentwidgets.common.config import qconfig, isDarkTheme, ConfigItem, Optio
 from qfluentwidgets.common.style_sheet import FluentStyleSheet
 from qfluentwidgets.common.font import setFont
 import os
+
+
+#######全局变量设置
+from module import allset
 basedir = os.path.dirname(__file__)
 
 class ImageWidget(QWidget):
@@ -131,6 +135,8 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.vBoxLayout.setContentsMargins(5, 9, 5, 9)
         self.vBoxLayout.addWidget(self.progressSlider, 1, Qt.AlignTop)
         self.play = Play(self)
+        self.LoopStatus = LoopStatus(self)
+        self.Shuffle = Shuffle(self)
 
         self.vBoxLayout.addLayout(self.timeLayout)
         self.timeLayout.setContentsMargins(10, 0, 10, 0)
@@ -145,9 +151,13 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.rightButtonLayout.setContentsMargins(0, 0, 4, 0)
 
         # self.leftButtonLayout.addWidget(self.volumeButton, 0, Qt.AlignLeft)
+        self.centerButtonLayout.addWidget(self.Shuffle)
+        self.centerButtonLayout.addStretch(3)
         self.centerButtonLayout.addWidget(self.skipBackButton)
         self.centerButtonLayout.addWidget(self.play)
         self.centerButtonLayout.addWidget(self.skipForwardButton)
+        self.centerButtonLayout.addStretch(3)
+        self.centerButtonLayout.addWidget(self.LoopStatus)
 
         self.buttonLayout.addWidget(self.leftButtonContainer, 0, Qt.AlignLeft)
         self.buttonLayout.addWidget(self.centerButtonContainer, 0, Qt.AlignHCenter)
@@ -170,6 +180,41 @@ class Play(MediaPlayBarButton):
         else:
             self.setIcon(FluentIcon.PLAY)
             self.setToolTip(self.tr('Play'))
+
+class Shuffle(MediaPlayBarButton):
+      # 随机播放
+    def _postInit(self):
+        super()._postInit()
+        self.setIconSize(QSize(14, 14))
+        self.setShuffle(False)
+
+    def setShuffle(self, isShuffle: bool):
+        if isShuffle:
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/随机播放.svg")))
+            self.setToolTip(self.tr('随机播放开启'))
+        else:
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/随机播放关.svg")))
+            self.setToolTip(self.tr('随机播放关闭'))
+
+class LoopStatus(MediaPlayBarButton):
+      # 单曲，列表循环切换
+    def _postInit(self):
+        super()._postInit()
+        self.setIconSize(QSize(14, 14))
+        self.setLoopStatus("None")
+
+    def setLoopStatus(self, isLoopStatus: str):
+        if isLoopStatus == "None":
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/不循环.svg")))
+            self.setToolTip(self.tr('列表不循环'))
+        if isLoopStatus == "Playlist":
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/列表循环.svg")))
+            self.setToolTip(self.tr('列表循环'))
+        if isLoopStatus == "Track":
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/单曲循环.svg")))
+            self.setToolTip(self.tr('当前播放循环'))
+
+
 
 class SettingCardGroup(QWidget):
     """ Setting card group """
@@ -536,14 +581,14 @@ class LyricLabel(QLabel):
 
     ###鼠标行为
     def mousePressEvent(self, e):
-        global ismoving
+        ismoving = allset.ismoving
         if e.button() == Qt.LeftButton:
             self.ismoving = ismoving
             self.start_point = e.globalPos()
             self.window_point = self.frameGeometry().topLeft()
 
     def mouseMoveEvent(self, e):
-        global ismoving
+        ismoving = allset.ismoving
         self.ismoving = ismoving
         if self.ismoving:
             relpos = e.globalPos() - self.start_point  # QPoint 类型可以直接相减

@@ -59,3 +59,6 @@ lycl: str = 0
 tt:str
 
 status1:str
+
+
+ismoving:bool

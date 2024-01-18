@@ -23,9 +23,14 @@ from module.widget import hotWidget, ComboBoxCard,SpinBoxCard,PushCard,SwitchCar
 import qfluentwidgets
 import os
 
+
+#######全局变量设置
+from module import allset
+
 basedir = os.path.dirname(__file__)
 
 ismoving = True
+allset.ismoving = ismoving
 
 class MyWindowUI(ScrollArea):
     def __init__(self, sizeHintdb: tuple[int, int], parent=None):
@@ -137,7 +142,7 @@ class MyWindowUI(ScrollArea):
 
 
         self.fontsizeCard = SpinBoxCard(
-            QIcon(os.path.join(basedir, '../res/icons/system/home.svg')),
+            FIF.FONT_SIZE,
             self.tr('字体大小'),
             self.tr('设置歌词字体的大小'),
             self.setting
@@ -159,6 +164,19 @@ class MyWindowUI(ScrollArea):
             OnText = self.tr("置顶"),
             OffText = self.tr("未置顶")
         )
+
+        self.moveCard = SwitchCard(
+            FIF.PIN,
+            self.tr('移动开关'),
+            self.tr('设置歌词是能移动'),
+            # None,
+            self.setting,
+            # Checked = True,
+            OnText = self.tr("可以"),
+            OffText = self.tr("不行")
+        )
+        self.moveCard.checkedChanged.connect(self.ismov)
+        self.moveCard.setChecked(True)
 
 
         self.showlycCard = PushCard(
@@ -197,6 +215,7 @@ class MyWindowUI(ScrollArea):
         self.setting.addSettingCard(self.switchunderlineCard)
         self.setting.addSettingCard(self.fontsizeCard)
         self.setting.addSettingCard(self.showlyctopCard)
+        self.setting.addSettingCard(self.moveCard)
         self.setting.addSettingCard(self.showlycCard)
 
 
@@ -222,8 +241,10 @@ class MyWindowUI(ScrollArea):
         global ismoving
         if checked:
             ismoving = True
+            allset.ismoving = ismoving
         else:
             ismoving = False
+            allset.ismoving = ismoving
 
     def heightForWidth(self, width):
         self.setWordWrap(True)  # 设置 label 可以换行

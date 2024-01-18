@@ -59,7 +59,8 @@ ids = 0
 faulthandler.enable()
 basedir = os.path.dirname(__file__)
 
-
+shu:bool = False
+loop:str = "None"
 class Main(FluentWindow):
     global font,bold,underline,pointSize
     def __init__(self, minWidth=750, minHeight=650):
@@ -113,6 +114,8 @@ class Main(FluentWindow):
         self.ui1.bas.skipBackButton.clicked.connect(self.ra)
         self.ui1.bas.play.clicked.connect(self.playa)
         self.ui1.bas.progressSlider.sliderMoved.connect(self.plaa)
+        self.ui1.bas.Shuffle.clicked.connect(self.Shuffle1)
+        self.ui1.bas.LoopStatus.clicked.connect(self.LoopStatus1)
 #########置顶更新
         self.ui.showlyctopCard.checkedChanged.connect(self.on_inTopCheckBox_clicked)
 #########刷新播放器状态
@@ -292,6 +295,8 @@ class Main(FluentWindow):
 
 #####读取播放状态
     def updateplayer(self):
+        global shu
+        global loop
         mp = pympris.MediaPlayer(allset.idss, allset.bus)
         playerdata = mp.player.Metadata
         data = playerdata
@@ -312,6 +317,18 @@ class Main(FluentWindow):
               self.playaa = True
         self.ui1.setrr(progress1,length1)
         self.ui1.bas.play.setPlay(self.playaa)
+
+        self.LoopStatus = mp.player.LoopStatus
+        loop = self.LoopStatus
+        self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus)
+        self.Shuffle = mp.player.Shuffle
+        self.ui1.bas.Shuffle.setShuffle(self.Shuffle)
+        shu = self.Shuffle
+        # print(self.LoopStatus)
+
+
+
+
         # print(self.playaa)
 
 ########更新专辑图片
@@ -349,7 +366,6 @@ class Main(FluentWindow):
             self.ui.showlycCard.setText(self.tr("显示歌词"))
 ##########下一首控制
     def next1(self):
-        global idss
         mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.Next()
 #########上一首控制
@@ -360,6 +376,25 @@ class Main(FluentWindow):
     def playa(self):
         mp = pympris.MediaPlayer(allset.idss, allset.bus)
         mp.player.PlayPause()
+#########随机播放
+    def Shuffle1(self):
+        global shu
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
+        if shu:
+            mp.player.Shuffle = bool(False)
+        else:
+            mp.player.Shuffle = bool(True)
+#########列表循环
+    def LoopStatus1(self):
+        global loop
+        mp = pympris.MediaPlayer(allset.idss, allset.bus)
+        if loop == "None":
+            mp.player.LoopStatus = str("Track")
+        elif loop == "Track":
+            mp.player.LoopStatus = str("Playlist")
+        else:
+            mp.player.LoopStatus = str("None")
+
 ########获取播放状态
     def plaa(self, position: int):
         append_num = "000000"
