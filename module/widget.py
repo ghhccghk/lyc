@@ -22,6 +22,7 @@ import os
 #######全局变量设置
 from module import allset
 basedir = os.path.dirname(__file__)
+x:int = 520
 
 class ImageWidget(QWidget):
     def __init__(self, image_path, app_name, app_description, max_height, parent=None):
@@ -66,7 +67,6 @@ class ImageWidget(QWidget):
         info_layout.addStretch()
         info_layout.addWidget(self.description_label)
         info_layout.addStretch()  # 添加底部垂直伸缩
-
         layout.addWidget(self.image_label)
         layout.addSpacing(75)
         layout.addLayout(info_layout)
@@ -539,7 +539,6 @@ class LyricLabel(QLabel):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.lyric1 = ''
         self.lyric2 = ''
-#
     ###读取歌词
     def set_lyrics(self, lyric1, lyric2):
         self.lyric1 = lyric1
@@ -548,19 +547,29 @@ class LyricLabel(QLabel):
 
     ###歌词显示
     def update_lyric(self):
+        global x
         self.setAlignment(Qt.AlignCenter)
-        if  self.lyric1 == ""  :
-            self.setText(" ")
-        else:
-            self.update_lyric1()
-
-    def update_lyric1(self):
         if  self.lyric2 == ""  :
             self.setText(self.lyric1)
             self.adjustSize()
         else:
             self.setText(self.lyric1+'\n'+ self.lyric2)
             self.adjustSize()
+        # 获取窗口宽度
+        window_width = self.width()
+        # # 设置窗口新的位置
+        new_x_position = x - window_width / 2
+        if allset.ismoving != True:
+            self.move(new_x_position, self.pos().y())
+        #
+        # # 设置窗口新的位置
+        # if self.pos().y() - x  > x:
+        #     if allset.ismoving != True:
+        #         self.move(new_x_position, self.pos().y())
+        # else:
+        #     new_x_position = x + window_width / 2
+        #     if allset.ismoving != True:
+        #         self.move(new_x_position, self.pos().y())
 
     ###歌词动画 废弃
     def start_scroll_animation(self):
@@ -588,11 +597,16 @@ class LyricLabel(QLabel):
             self.window_point = self.frameGeometry().topLeft()
 
     def mouseMoveEvent(self, e):
+        global x
         ismoving = allset.ismoving
         self.ismoving = ismoving
         if self.ismoving:
             relpos = e.globalPos() - self.start_point  # QPoint 类型可以直接相减
             self.move(self.window_point + relpos)      # 所以说 Qt 真是赞！
+            window_width = self.width()
+            # 计算新的 x 位置
+            new_x_position = self.pos().x() + window_width / 2
+            x = new_x_position
 
     # def mouseReleaseEvent(self, e):
         # self.ismoving = False
