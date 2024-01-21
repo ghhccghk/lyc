@@ -279,10 +279,14 @@ class Main(FluentWindow):
         res1111 = res111.get("position","")
         allset.ddd = res11["currentTrack"]["id"]
         if res1111 != "" :
+            allset.nolike = True
+            self.ui1.bas.like.nolike(allset.nolike)
             singername = res11["currentTrack"]["artists"][0]
             alname = res11["currentTrack"]["album"]["name"]
             allset.picurl = res11["currentTrack"]["album"]["blurPicUrl"]
         else:
+            allset.nolike = False
+            self.ui1.bas.like.nolike(allset.nolike)
             singername = res11["currentTrack"]["ar"][0]
             alname = res11["currentTrack"]["al"]["name"]
             allset.picurl = res11["currentTrack"]["al"]["picUrl"]
@@ -318,10 +322,20 @@ class Main(FluentWindow):
         self.ui1.setrr(progress1,length1)
         self.ui1.bas.play.setPlay(self.playaa)
 
-        self.LoopStatus = mp.player.LoopStatus
-        loop = self.LoopStatus
+        # self.LoopStatus = mp.player.LoopStatus
+        try:
+            self.LoopStatus = mp.player.LoopStatus
+        except pympris.common.PyMPRISException as e:
+            # 处理异常
+            # print(f"错误：{e}")
+            self.Shuffle = "None"
         self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus)
-        self.Shuffle = mp.player.Shuffle
+        try:
+            self.Shuffle = mp.player.Shuffle
+        except pympris.common.PyMPRISException as e:
+            # 处理异常
+            # print(f"错误：{e}")
+            self.Shuffle = False
         self.ui1.bas.Shuffle.setShuffle(self.Shuffle)
         shu = self.Shuffle
         # print(self.LoopStatus)
@@ -438,6 +452,7 @@ class Main(FluentWindow):
       min_numeric = min(numeric_values, default=None)
       random_number = random.randint(min_numeric, max_numeric)
       aaaaa = random_number
+      # print(allset.new_comments)
       for item in allset.new_comments:
           if "username_" + str(aaaaa) in item:
               username = item["username_" + str(aaaaa) ]

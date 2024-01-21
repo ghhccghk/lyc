@@ -119,8 +119,9 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.leftButtonLayout = QHBoxLayout(self.leftButtonContainer)
         self.centerButtonLayout = QHBoxLayout(self.centerButtonContainer)
         self.rightButtonLayout = QHBoxLayout(self.rightButtonContainer)
+        self.like = like(self)
 
-        self.skipBackButton = MediaPlayBarButton(QIcon(os.path.join(basedir,"../res/icons/上一首.png")), self)
+        self.skipBackButton = self.like
         self.skipForwardButton = MediaPlayBarButton(QIcon(os.path.join(basedir,"../res/icons/下一首.png")), self)
         self.playButton.deleteLater()
         self.volumeButton.deleteLater()
@@ -153,7 +154,7 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         # self.leftButtonLayout.addWidget(self.volumeButton, 0, Qt.AlignLeft)
         self.centerButtonLayout.addWidget(self.Shuffle)
         self.centerButtonLayout.addStretch(3)
-        self.centerButtonLayout.addWidget(self.skipBackButton)
+        self.centerButtonLayout.addWidget(self.like)
         self.centerButtonLayout.addWidget(self.play)
         self.centerButtonLayout.addWidget(self.skipForwardButton)
         self.centerButtonLayout.addStretch(3)
@@ -180,6 +181,22 @@ class Play(MediaPlayBarButton):
         else:
             self.setIcon(FluentIcon.PLAY)
             self.setToolTip(self.tr('Play'))
+
+
+class like(MediaPlayBarButton):
+    def _postInit(self):
+        super()._postInit()
+        self.setIconSize(QSize(14, 14))
+        self.nolike(False)
+
+    def nolike(self, nolike: bool):
+        if nolike:
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/nolike.svg")))
+            self.setToolTip(self.tr('不喜欢'))
+        else:
+            self.setIcon(QIcon(os.path.join(basedir,"../res/icons/上一首.png")))
+            self.setToolTip(self.tr('上一首'))
+
 
 class Shuffle(MediaPlayBarButton):
       # 随机播放

@@ -64,7 +64,7 @@ class aboueInterface(ScrollArea):
         max_height = 300
 
         self.testcard = ImageWidget(os.path.join(basedir, "../res/icons/108.png"), app_name, app_description, max_height)
-        self.testcard.setMaximumHeight(300)
+        self.testcard.adjustSize()
 
 
         self.__initWidget()

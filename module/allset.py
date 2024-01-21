@@ -62,3 +62,5 @@ status1:str
 
 
 ismoving:bool
+
+nolike:bool
