@@ -37,8 +37,8 @@ if not players_ids:
     sys.exit()
 
 picl: str = 0
-picurl: str
-ddd: str
+picurl: str = str(1)
+ddd: str = str(233)
 idss: str = players_ids[0]
 trackid: str
 length: str
@@ -60,6 +60,7 @@ tt:str
 
 status1:str
 
+# kdenot:bool =
 
 ismoving:bool
 

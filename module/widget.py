@@ -525,6 +525,7 @@ class hotWidget(QWidget):
 
         # 创建 QLabel 用于热评
         self.name_label = QLabel(self)
+        self.label = QLabel(self)
 
         # 设置字体样式
         name_font = QFont()
@@ -533,6 +534,9 @@ class hotWidget(QWidget):
         self.name_label.setFont(name_font)
         self.name_label.setWordWrap(True)
         self.name_label.setText("test 测试文字test")
+        self.label.setText("———— 用户： test")
+        self.label.setAlignment(Qt.AlignRight | Qt.AlignBottom)
+        self.label.setFont(name_font)
 
         # 设置布局
         layout = QHBoxLayout(self)
@@ -540,14 +544,16 @@ class hotWidget(QWidget):
         info_layout = QVBoxLayout()
         info_layout.addStretch()  # 添加顶部垂直伸缩
         info_layout.addWidget(self.name_label)
+        info_layout.addWidget(self.label)
         info_layout.addStretch()  # 添加底部垂直伸缩
 
         layout.addSpacing(10)
         layout.addLayout(info_layout)
         layout.addSpacing(10)
 
-    def set_hot_content(self, hot):
+    def set_hot_content(self, hot, name):
         self.name_label.setText(hot)
+        self.label.setText(name)
 
 class LyricLabel(QLabel):
     def __init__(self, parent=None):

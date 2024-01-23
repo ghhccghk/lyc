@@ -18,6 +18,8 @@ from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkRe
 #######qframelesswindow 引用
 from qframelesswindow import AcrylicWindow
 from qfluentwidgets import FluentWindow,ColorDialog,FluentIcon,NavigationItemPosition,MessageBox,InfoBar,InfoBarPosition
+######
+from urllib.parse import urlparse, unquote,urlunparse
 
 import time
 
@@ -76,29 +78,27 @@ class Main(FluentWindow):
         self.initNavigation()
 ##################功能代码
 
-        if allset.players_ids != '' :
-            self.timer = QtCore.QTimer(self)
-            self.timer.timeout.connect(self.update_label)
-            self.timer.start(100)  # 每隔300毫秒（1秒）更新一次
-        if allset.players_ids != '' :
+        self.timer = QtCore.QTimer(self)
+        self.timer.timeout.connect(self.update_label)
+        self.timer.start(100)  # 每隔300毫秒（1秒）更新一次
+      # if allset.players_ids != '' :
 #        self.initWindow()
-            self.ab = QtCore.QTimer(self)
-            self.ab.timeout.connect(self.button1)
-            self.ab.start(100)  # 每隔100毫秒更新一次
-        if allset.players_ids != '' :
-            self.a = QtCore.QTimer(self)
-            self.a.timeout.connect(self.update_a)
-            self.a.start(100)  # 每隔100毫秒更新一次
-        if allset.players_ids != '' :
-            self.b = QtCore.QTimer(self)
-            self.b.timeout.connect(self.update_pic)
-            self.b.timeout.connect(self.updateplayer)
-            self.b.start(100)  # 每隔100毫秒更新一次
+        self.ab = QtCore.QTimer(self)
+        self.ab.timeout.connect(self.button1)
+        self.ab.start(100)  # 每隔100毫秒更新一次
 
-        if allset.players_ids != '' :
-            self.c = QtCore.QTimer(self)
-            self.c.timeout.connect(self.hotsettime)
-            self.c.start(1000)  # 每隔100毫秒更新一次
+        self.a = QtCore.QTimer(self)
+        self.a.timeout.connect(self.update_a)
+        self.a.start(100)  # 每隔100毫秒更新一次
+
+        self.b = QtCore.QTimer(self)
+        self.b.timeout.connect(self.update_pic)
+        self.b.timeout.connect(self.updateplayer)
+        self.b.start(100)  # 每隔100毫秒更新一次
+
+        self.c = QtCore.QTimer(self)
+        self.c.timeout.connect(self.hotsettime)
+        self.c.start(1000)  # 每隔100毫秒更新一次
 
 
 
@@ -277,24 +277,26 @@ class Main(FluentWindow):
         res11 = json.loads(res1.text)
         res111 = res11["currentTrack"]
         res1111 = res111.get("position","")
-        allset.ddd = res11["currentTrack"]["id"]
+        ddd = res11["currentTrack"]["id"]
         if res1111 != "" :
             allset.nolike = True
             self.ui1.bas.like.nolike(allset.nolike)
             singername = res11["currentTrack"]["artists"][0]
             alname = res11["currentTrack"]["album"]["name"]
-            allset.picurl = res11["currentTrack"]["album"]["blurPicUrl"]
+            # if allset.kdenot:
+            #   allset.picurl = res11["currentTrack"]["album"]["blurPicUrl"]
         else:
             allset.nolike = False
             self.ui1.bas.like.nolike(allset.nolike)
             singername = res11["currentTrack"]["ar"][0]
             alname = res11["currentTrack"]["al"]["name"]
-            allset.picurl = res11["currentTrack"]["al"]["picUrl"]
+            # if allset.kdenot:
+            #   allset.picurl = res11["currentTrack"]["al"]["picUrl"]
         singername1 = singername.get('name', '')
         name = res111.get('name', '')
-        self.ui.label9.setText(self.tr("当前歌曲ID：" )+ str(allset.ddd))
+        self.ui.label9.setText(self.tr("当前歌曲ID：" )+ str(ddd))
         # self.ui.label9.adjustSize()
-        self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
+        # self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
         # self.ui1.label2.adjustSize()
 
 #####读取播放状态
@@ -305,11 +307,21 @@ class Main(FluentWindow):
         playerdata = mp.player.Metadata
         data = playerdata
         allset.trackid = data.get('mpris:trackid', '')
-        length = data.get('mpris:length', '')#####总时长
         allset.length = data.get('mpris:length', '')#####总时长
+        title = data.get('xesam:title', '')
+        album = data.get('xesam:album', '')
+        artist = data.get('xesam:artist', '')
+        # pid = data.get('mpris:artUrl', '')
+        # if pid != '':
+        #   allset.kdenot = False
+        allset.picurl = data.get('mpris:artUrl', '')
+        #   # print(allset.picurl)
+        # else:
+        #   allset.kdenot = True
+        self.ui1.label2.setText(str(title) + ' - ' + str(artist[0]) + ' - ' + str(album) )
         progress = mp.player.Position
         p = str(progress)
-        l = str(length)
+        l = str(allset.length)
         progress1 = p[:-6] + '.' + p[-6:]
         length1 = l[:-6] + '.' + l[-6:]
         progress1 = float(progress1)
@@ -329,7 +341,7 @@ class Main(FluentWindow):
             # 处理异常
             # print(f"错误：{e}")
             self.Shuffle = "None"
-        self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus)
+        self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus1)
         try:
             self.Shuffle = mp.player.Shuffle
         except pympris.common.PyMPRISException as e:
@@ -346,19 +358,31 @@ class Main(FluentWindow):
         # print(self.playaa)
 
 ########更新专辑图片
+    def is_local_file(self):
+        parsed_url = urlparse(allset.picurl)
+        allset.picurl = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, '', ''))
+        return parsed_url.scheme == "file"
+
     def update_pic(self):
-          if allset.ddd != allset.picl :
-              allset.picl = allset.ddd
-              # print(picl)
+          if allset.ddd != allset.picurl :
+              allset.ddd = allset.picurl
+              # print(allset.picurl)
               self.pica()
 
     def pica(self):
-        self.manager = QNetworkAccessManager(self)
-        self.request = QNetworkRequest()
-        self.request.CacheLoadControl.AlwaysNetwork
-        self.request.setUrl(allset.picurl)
-        self.reply =  self.manager.get(self.request)
-        self.reply.finished.connect(self.handle_image)# 将槽函数连接到响应信号
+        if self.is_local_file():
+          pixmap = QPixmap(os.path.join(unquote(allset.picurl[len("file://"):])))
+          # print(unquote(allset.picurl[len("file://"):]))
+          self.ui1.label_pic.setPixmap(pixmap)
+          self.ui1.label_pic.setScaledContents(True)
+        else:
+          # print(self.is_local_file())
+          self.manager = QNetworkAccessManager(self)
+          self.request = QNetworkRequest()
+          self.request.CacheLoadControl.AlwaysNetwork
+          self.request.setUrl(allset.picurl)
+          self.reply =  self.manager.get(self.request)
+          self.reply.finished.connect(self.handle_image)# 将槽函数连接到响应信号
 
     def handle_image(self):
         # 从响应中读取数据
@@ -368,7 +392,6 @@ class Main(FluentWindow):
         # 创建 QPixmap 并设置给 QLabel
         pixmap = QPixmap()
         pixmap.loadFromData(data)
-#        print(pixmap)
         self.ui1.label_pic.setPixmap(pixmap)
         self.ui1.label_pic.setScaledContents(True)
 
@@ -459,7 +482,7 @@ class Main(FluentWindow):
               hotcomments = item["hotcomments_" + str(aaaaa) ]
               hotcomment = hotcomments.replace("\n", " ； ")
               # self.ui.label12.setText("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
-              self.ui.testcard.set_hot_content("       " + hotcomment + '\n'+ "         ———— 用户：" + username )
+              self.ui.testcard.set_hot_content("       " + hotcomment + '\n',"———— 用户：" + username )
 
     def outkey(self,content) -> tuple:
         data = content
