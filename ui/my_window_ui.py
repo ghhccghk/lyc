@@ -23,8 +23,6 @@ from module.widget import hotWidget, ComboBoxCard,SpinBoxCard,PushCard,SwitchCar
 import qfluentwidgets
 import os
 
-
-#######全局变量设置
 from module import allset
 
 basedir = os.path.dirname(__file__)
@@ -35,8 +33,6 @@ allset.ismoving = ismoving
 class MyWindowUI(ScrollArea):
     def __init__(self, sizeHintdb: tuple[int, int], parent=None):
         super().__init__(parent=parent)
-        # setting label
-#        value = 1
         self.setObjectName("MyWindowUI")
         self.scrollWidget = QWidget()
         self.expandLayout = ExpandLayout(self.scrollWidget)
@@ -58,18 +54,20 @@ class MyWindowUI(ScrollArea):
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
 
-        #########
         self.label8 = QtWidgets.QLabel(self.tr("Tips：如遇歌词显示问题，可提交 Issue,"), self)
         self.label8.move(25, 440)
-        self.label8.setFont(afont)##修改字体
+        self.label8.setFont(afont)
+        ##修改字体
 
         self.label9 = QtWidgets.QLabel(self.tr("歌曲id："), self)
         self.label9.move(299, 440)
-        self.label9.setFont(afont)##修改字体
+        self.label9.setFont(afont)
+        ##修改字体
 
         self.label3 = QtWidgets.QLabel(self.tr("歌词未显示，"), self)
         self.label3.move(125, 60)
-        self.label3.setFont(afont)##修改字体
+        self.label3.setFont(afont)
+        ##修改字体
 
         self.horizontalLayout.addWidget(self.label3)
         self.horizontalLayout.addWidget(self.label8)
@@ -87,7 +85,8 @@ class MyWindowUI(ScrollArea):
         self.hot = SettingCardGroup(self.tr('当前歌曲网易云热评'), self.scrollWidget)
         self.testcard = hotWidget()
         self.testcard.setMaximumHeight(300)
-        # 歌词效果设置 ==============================================================================
+
+
         self.setting = SettingCardGroup(self.tr('歌词效果设置'), self.scrollWidget)
 
         self.fontCard = ComboBoxCard(
@@ -95,7 +94,6 @@ class MyWindowUI(ScrollArea):
             self.tr('字体设置'),
             self.tr('设置歌词的字体'),
             self.setting
-
         )
         # 获取系统中所有的字体
         fonts = QFontDatabase.families()
@@ -110,12 +108,9 @@ class MyWindowUI(ScrollArea):
             QIcon(os.path.join(basedir, '../res/icons/粗·.svg')),
             self.tr('字体加粗'),
             self.tr('设置歌词是否加粗'),
-            # None,
             self.setting,
-            # Checked = True,
             OnText = self.tr("已加"),
             OffText = self.tr("未加")
-
         )
         self.boldCard.setChecked(True)
 
@@ -124,9 +119,7 @@ class MyWindowUI(ScrollArea):
             QIcon(os.path.join(basedir, '../res/icons/下划.svg')),
             self.tr('字体加下划线'),
             self.tr('设置歌词是否加下划线'),
-            # None,
             self.setting,
-            # Checked = True,
             OnText = self.tr("已加"),
             OffText = self.tr("未加")
         )
@@ -192,12 +185,9 @@ class MyWindowUI(ScrollArea):
 
 
     def __initWidget(self):
-        #self.resize(1000, 800)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        # self.setViewportMargins(0, 95, 0, 20)
         self.setViewportMargins(0, 240, 0, 30)
         self.setWidget(self.scrollWidget)
-        #self.scrollWidget.resize(1000, 800)
         self.setWidgetResizable(True)
 
         # # initialize style sheet
@@ -205,7 +195,6 @@ class MyWindowUI(ScrollArea):
 
         # initialize layout
         self.__initLayout()
-        #self.__connectSignalToSlot()
 
     def __initLayout(self):
         self.hot.addSettingCard(self.testcard)
@@ -222,7 +211,6 @@ class MyWindowUI(ScrollArea):
         # add setting card group to layout
         self.expandLayout.setSpacing(28)
         self.expandLayout.setContentsMargins(60, 10, 60, 0)
-        # self.expandLayout.addWidget(self.app_name)
         self.expandLayout.addWidget(self.hot)
         self.expandLayout.addWidget(self.setting)
 

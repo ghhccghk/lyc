@@ -95,6 +95,40 @@ class playbackcontrol(ScrollArea):
         self.card.adjustSize()
         self.__initWidget()
 
+    def resizeEvent(self, event):
+        # 窗口大小变化时调用，保持图片比例
+        super().resizeEvent(event)
+        self.adjust_image_size()
+
+    def adjust_image_size(self):
+        # 获取当前窗口大小
+        window_size = self.size()
+
+        # 获取图片的原始大小
+        # original_size = self.label_pic.pixmap().size()
+
+        # 计算宽度和高度的缩放比例
+        # width_ratio = window_size.width() - 20
+        height_ratio = window_size.height() / 1.64
+        # # 取较小的缩放比例，以保持等比例缩放
+        # scale_factor = min(width_ratio, height_ratio)
+
+        # # 计算新的图片大小
+        # new_width = int(original_size.width() * (scale_factor - 0.1))
+        # new_width1 = int(original_size.width() * (scale_factor - 0.3))
+        # new_height = int(original_size.height() * (scale_factor - 0.1))
+
+        # print(round(width_ratio))
+        # print(height_ratio)
+
+        # 设置新的图片大小
+        self.label_pic.setMaximumSize(round(height_ratio) , round(height_ratio))
+        self.label_pic.setFrameShape(QFrame.NoFrame)
+        self.label_pic.setScaledContents(True)
+        # print(height_ratio)
+        self.card.setFixedHeight(height_ratio)
+        self.playcontrolcard.adjustSize()
+
     def __initWidget(self):
         #self.resize(1000, 800)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -115,7 +149,7 @@ class playbackcontrol(ScrollArea):
         self.playcontrolcard.addSettingCard(self.card)
         # add setting card group to layout
         self.expandLayout.setSpacing(28)
-        self.expandLayout.setContentsMargins(60, 10, 60, 0)
+        self.expandLayout.setContentsMargins(55, 10, 55, 0)
         self.expandLayout.addWidget(self.playcontrolcard)
 
     def setrr(self, position: int, duration: int):

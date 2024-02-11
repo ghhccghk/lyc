@@ -27,6 +27,7 @@ import time
 from ui.my_window_ui import MyWindowUI,LyricLabel
 from ui.playbackcontrol_ui import playbackcontrol
 from ui.aboueInterface_ui import aboueInterface
+from ui.audio_see_and_test_ui import audioInterface
 from lyrics_backend.interface import getCurrentLyric
 import lyrics_backend.interface
 from module.hotcomments import hotComments
@@ -46,6 +47,7 @@ import os
 
 # netease_cloud_music_api = NeteaseCloudMusicApi()  # 初始化API
 # # netease_cloud_music_api.cookie = "003A959854B58FE9A9730D6A043D0E703F1726CEF413151C220DD56933B2596E4C602D350A23DD64E70339701D36D169E11CDED10A3CDDB9BBA7D55A0D0536D722D2A4C8D61B1295FED3396AC1C0C04A9893DADCCC5EE1B76F7CE518FC9BA82A033179AF074238D6082BD3E50F167B95D9FB158F5AE1322BE74FC266DB4EF0739730141AE8E0E9B06A275BD8D1F852EAF5ED6EE792F4B449CAEBE4FA09F4B67B89F07A860F1E011B2FC6BB12CFDF9F896A786CB041B654146C9431C0980D6447AB9F9B246A3A0B6BE0776632F0CC57148F9174911FE85A2CEB4FBE4F7A096A326721FBF61558482C9E42EDD708D26CF6DCD62CD9D370A5BD348B436E864A8EE18967EAE4D099B205F66FF821280A7689D816D4B1D2E268EADCADB1E298866C05D507489845CC48728886048349BD06B5C4D58D22FE2E25766EF8320B12630E8150601568DE637C5FEE661744D638DDF470"  # 设置cookie， 如果没有cookie需要先登录 具体见example.py
+# netease_cloud_music_api.request("register_anonimous", {"keywords":"1"})
 # response = netease_cloud_music_api.request("cloudsearch", {"keywords":"海阔天空","limit": "1"})  # 调用API
 #
 # # 获取帮助
@@ -70,6 +72,7 @@ class Main(FluentWindow):
         self.resize(750,650)
         self.ui = MyWindowUI(sizeHintdb=(minWidth, minHeight), parent=self)
         self.ui1 = playbackcontrol(sizeHintdb=(minWidth, minHeight), parent=self)
+        self.audioInterface = audioInterface(sizeHintdb=(minWidth, minHeight), parent=self)
         self.aboueInterface = aboueInterface(sizeHintdb=(minWidth, minHeight), parent=self)
 ##################ui修改
         self.setWindowTitle("设置")
@@ -132,10 +135,12 @@ class Main(FluentWindow):
             self.desktopLyric.setWindowFlags(QtCore.Qt.Widget | Qt.FramelessWindowHint)# 取消置顶
             # self.desktopLyric.setWindowFlags(Qt.FramelessWindowHint)
             self.desktopLyric.show()
+            allset.lycl = 1
         else:
             self.desktopLyric.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)# 置顶
             # self.desktopLyric.setWindowFlags(Qt.FramelessWindowHint)
             self.desktopLyric.show()
+            allset.lycl = 1
 
 
 ##########侧边栏添加
@@ -143,15 +148,22 @@ class Main(FluentWindow):
         # add sub interface
         self.addSubInterface(self.ui1,
                              QIcon(os.path.join(basedir, "res/icons/jump.svg")),
-                             self.tr('播放控制'))
+                             self.tr('播放控制')
+                             )
+        self.addSubInterface(self.audioInterface,
+                             QIcon(os.path.join(basedir, "res/icons/jump.svg")),
+                             self.tr('音频可视化和控制郊狼')
+                             )
         self.addSubInterface(self.ui,
                              FluentIcon.SETTING,
                              self.tr('设置'),
-                             NavigationItemPosition.BOTTOM)
+                             NavigationItemPosition.BOTTOM
+                             )
         self.addSubInterface(self.aboueInterface,
                              FluentIcon.INFO,
                              self.tr('关于'),
-                             NavigationItemPosition.BOTTOM)
+                             NavigationItemPosition.BOTTOM
+                             )
 
 
 ########字体设置
@@ -273,6 +285,11 @@ class Main(FluentWindow):
 
 #############信息更新
     def update_a(self):
+      mp = pympris.MediaPlayer(allset.idss, allset.bus)
+      aa = str(mp.root.Identity)
+      # print(aa)
+
+      if aa == "YesPlayMusic" :
         res1 = requests.get("http://127.0.0.1:27232/player")
         res11 = json.loads(res1.text)
         res111 = res11["currentTrack"]
@@ -298,6 +315,9 @@ class Main(FluentWindow):
         # self.ui.label9.adjustSize()
         # self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
         # self.ui1.label2.adjustSize()
+      else:
+          self.ui1.bas.like.nolike(False)
+          self.ui.label9.setText(self.tr("不是Yesplaymusic，无法获取歌曲ID" ))
 
 #####读取播放状态
     def updateplayer(self):
@@ -318,7 +338,24 @@ class Main(FluentWindow):
         #   # print(allset.picurl)
         # else:
         #   allset.kdenot = True
-        self.ui1.label2.setText(str(title) + ' - ' + str(artist[0]) + ' - ' + str(album) )
+        if artist != ['']:
+            # print(artist)
+            if not artist:
+              artist_str = self.tr("无艺术家")
+            else:
+              artist_str = str(artist[0])
+        else:
+            artist_str = self.tr("无艺术家")
+        if title != "":
+            title = str(title)
+        else:
+            title = self.tr("无标题")
+        if album != "":
+            album = str(album)
+        else:
+            album = self.tr("无专辑")
+        # print(artist)
+        self.ui1.label2.setText(str(title) + ' - ' + artist_str + ' - ' + str(album) )
         progress = mp.player.Position
         p = str(progress)
         l = str(allset.length)
@@ -340,8 +377,8 @@ class Main(FluentWindow):
         except pympris.common.PyMPRISException as e:
             # 处理异常
             # print(f"错误：{e}")
-            self.Shuffle = "None"
-        self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus1)
+            self.LoopStatus = "None"
+        self.ui1.bas.LoopStatus.setLoopStatus(self.LoopStatus)
         try:
             self.Shuffle = mp.player.Shuffle
         except pympris.common.PyMPRISException as e:
@@ -350,7 +387,7 @@ class Main(FluentWindow):
             self.Shuffle = False
         self.ui1.bas.Shuffle.setShuffle(self.Shuffle)
         shu = self.Shuffle
-        # print(self.LoopStatus)
+        loop = self.LoopStatus
 
 
 
@@ -360,7 +397,11 @@ class Main(FluentWindow):
 ########更新专辑图片
     def is_local_file(self):
         parsed_url = urlparse(allset.picurl)
-        allset.picurl = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, '', ''))
+        if allset.picurl == "":
+          allset.picurl == ""
+        else:
+          allset.picurl = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, '', ''))
+
         return parsed_url.scheme == "file"
 
     def update_pic(self):
@@ -371,7 +412,10 @@ class Main(FluentWindow):
 
     def pica(self):
         if self.is_local_file():
-          pixmap = QPixmap(os.path.join(unquote(allset.picurl[len("file://"):])))
+          if allset.picurl == "":
+            pixmap = QPixmap(os.path.join(basedir, "res/icons/108.png"))
+          else:
+            pixmap = QPixmap(os.path.join(unquote(allset.picurl[len("file://"):])))
           # print(unquote(allset.picurl[len("file://"):]))
           self.ui1.label_pic.setPixmap(pixmap)
           self.ui1.label_pic.setScaledContents(True)
@@ -389,9 +433,12 @@ class Main(FluentWindow):
         reply = self.sender()
         data = reply.readAll()
 
-        # 创建 QPixmap 并设置给 QLabel
-        pixmap = QPixmap()
-        pixmap.loadFromData(data)
+
+        if allset.picurl == "":
+          pixmap = QPixmap(os.path.join(basedir, "res/icons/108.png"))
+        else:
+          pixmap = QPixmap()
+          pixmap.loadFromData(data)
         self.ui1.label_pic.setPixmap(pixmap)
         self.ui1.label_pic.setScaledContents(True)
 
@@ -426,10 +473,10 @@ class Main(FluentWindow):
         global loop
         mp = pympris.MediaPlayer(allset.idss, allset.bus)
         if loop == "None":
+            mp.player.LoopStatus = str("Playlist")
+        elif loop == "Playlist":
             mp.player.LoopStatus = str("Track")
         elif loop == "Track":
-            mp.player.LoopStatus = str("Playlist")
-        else:
             mp.player.LoopStatus = str("None")
 
 ########获取播放状态

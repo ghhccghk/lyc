@@ -63,7 +63,7 @@ class aboueInterface(ScrollArea):
         app_description = "基于PySide6开发，采用Fluent-Widgets作为UI界面,目前只支持显示来自yesplaymusic的歌词。"
         max_height = 300
 
-        self.testcard = ImageWidget(os.path.join(basedir, "../res/icons/108.png"), app_name, app_description, max_height)
+        self.testcard = ImageWidget(os.path.join(basedir,"../res/icons/SystemPanel.png"), app_name, app_description, max_height)
         self.testcard.adjustSize()
 
 
