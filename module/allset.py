@@ -46,7 +46,7 @@ length: str
 
 ####随机数生成
 stra = ''
-a=stra.join(random.choice("0123456789abcdef") for i in range(32))
+a = stra.join(random.choice("0123456789abcdef") for i in range(32))
 song_id: int
 song_id1: int = 0
 
@@ -56,12 +56,13 @@ new_comments: str
 ######歌词显示全局通告
 lycl: str = 0
 
+#####提示窗口文本
 tt:str
 
 status1:str
-
-# kdenot:bool =
-
-ismoving:bool
-
+###设定能否移动
+ismoving:bool = True
+####判断是不是在私人电台
 nolike:bool
+
+lyric:str = ""

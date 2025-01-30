@@ -1,34 +1,25 @@
 from PySide6 import QtWidgets
 from PySide6 import QtCore
-from PySide6.QtCore import Qt, QLocale,QPointF, QPropertyAnimation, QObject, Property,QAbstractAnimation,Signal,QTimer,QRegularExpression,QRect,QSize
-from PySide6.QtGui import QFontDatabase,QPainter,QFont,QPainterPath,QFontMetrics,QPen,QColor,QIcon,QRegularExpressionValidator,QPixmap,QImage
-from PySide6.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout,QLabel,QLineEdit,QFrame,QSpacerItem, QSizePolicy
+from PySide6.QtCore import Qt, QLocale,QRect
+from PySide6.QtGui import QFontDatabase,QPainter,QFont,QPainterPath,QFontMetrics,QPen,QColor,QIcon
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout,QLabel,QLineEdit,QFrame,QSpacerItem, QSizePolicy
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QToolButton, QVBoxLayout, QPushButton
 
-from qfluentwidgets import (SettingCardGroup, SwitchSettingCard, HyperlinkCard,InfoBar,
-                            ComboBoxSettingCard, ScrollArea, ExpandLayout, InfoBarPosition,SettingCard)
+from qfluentwidgets import SettingCardGroup
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import AcrylicWindow
-from qfluentwidgets import PushButton,ComboBox,VBoxLayout, setTheme, Theme, setThemeColor, setFont, ExpandLayout,SpinBox,SwitchButton, Theme, FluentIcon,ToolButton,ScrollArea,CheckBox
-from qfluentwidgets.multimedia import MediaPlayBarButton
-from qfluentwidgets.multimedia.media_play_bar import MediaPlayBarBase
-from qfluentwidgets.components.widgets.label import CaptionLabel
-from typing import Union
-from qfluentwidgets.components.widgets.switch_button import SwitchButton, IndicatorPosition
-from qfluentwidgets.common.icon import FluentIconBase
-from qfluentwidgets.common.config import qconfig, isDarkTheme, ConfigItem, OptionsConfigItem
+from qfluentwidgets import PushButton,ComboBox,VBoxLayout, setTheme, Theme, setThemeColor, setFont, ExpandLayout,SpinBox,SwitchButton,ToolButton,ScrollArea,CheckBox
 
 from module.widget import hotWidget, ComboBoxCard,SpinBoxCard,PushCard,SwitchCard,LyricLabel
 
-import qfluentwidgets
 import os
 
 from module import allset
 
 basedir = os.path.dirname(__file__)
 
-ismoving = True
-allset.ismoving = ismoving
+# ismoving = True
+# allset.ismoving = ismoving
 
 class MyWindowUI(ScrollArea):
     def __init__(self, sizeHintdb: tuple[int, int], parent=None):

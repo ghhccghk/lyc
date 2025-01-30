@@ -59,6 +59,7 @@ underline: bool = False #####下划线
 pointSize: int = 20.22  ###字号
 foncolor: str = "00000000" ####黑色
 ids = 0
+abc:bool = False
 #debug使用
 faulthandler.enable()
 basedir = os.path.dirname(__file__)
@@ -83,25 +84,15 @@ class Main(FluentWindow):
 
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.update_label)
-        self.timer.start(100)  # 每隔300毫秒（1秒）更新一次
-      # if allset.players_ids != '' :
-#        self.initWindow()
-        self.ab = QtCore.QTimer(self)
-        self.ab.timeout.connect(self.button1)
-        self.ab.start(100)  # 每隔100毫秒更新一次
-
-        self.a = QtCore.QTimer(self)
-        self.a.timeout.connect(self.update_a)
-        self.a.start(100)  # 每隔100毫秒更新一次
-
-        self.b = QtCore.QTimer(self)
-        self.b.timeout.connect(self.update_pic)
-        self.b.timeout.connect(self.updateplayer)
-        self.b.start(100)  # 每隔100毫秒更新一次
+        self.timer.timeout.connect(self.button1)
+        self.timer.timeout.connect(self.update_a)
+        self.timer.timeout.connect(self.update_pic)
+        self.timer.timeout.connect(self.updateplayer)
+        self.timer.start(100)  # 每隔100毫秒更新一次
 
         self.c = QtCore.QTimer(self)
         self.c.timeout.connect(self.hotsettime)
-        self.c.start(1000)  # 每隔100毫秒更新一次
+        self.c.start(1000)  # 每隔1000毫秒更新一次
 
 
 
@@ -194,13 +185,14 @@ class Main(FluentWindow):
     def showColorDialog(self):
         global foncolor
         # print(foncolor)
-        colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=False)
+        colorset = ColorDialog(QColor(foncolor), self.tr('颜色设置'), self.window(),enableAlpha=True)
         colorset.setColor(QColor(foncolor), movePicker=True)
         colorset.colorChanged.connect(lambda c: self.setcolor(c))
         colorset.exec()
 
     def setcolor(self,c):
         global foncolor
+        print(c)
         foncolor = c.name()
         self.change_font()
 
@@ -241,6 +233,10 @@ class Main(FluentWindow):
             self.desktopLyric.setStyleSheet("color:"+foncolor)
             self.desktopLyric.show()
 
+    def close_desktopLyric(self):
+            self.desktopLyric.close()
+
+
 
 ###############设置控制的播放器
 
@@ -254,6 +250,7 @@ class Main(FluentWindow):
 
 ##################歌词更新代码
     def update_label(self):
+        global abc
         res = lyrics_backend.interface.getCurrentLyric(0)
         lyric = res.get('lyric', '')  # 如果 'lyric' 键不存在，返回空字符串
         tlyric = res.get('tlyric', '') # 如果 'lyric' 键不存在，返回空字符串
@@ -270,21 +267,28 @@ class Main(FluentWindow):
         # if status == 200 :
 
 #        print(singername)
-
-        if status == 414:
-            self.ui.label.setText(lyric)
-            self.desktopLyric.set_lyrics(lyric,tlyric)
+#        print(abc)
+ #       print(allset.lyric)
+        if allset.lyric != "":
+            #print(abc)
+            self.ui.label.setText(allset.lyric)
+            self.desktopLyric.set_lyrics(allset.lyric,tlyric)
             self.ui.label.adjustSize()
-        else:
-
-            # self.desktopLyric.set_lyrics("间奏或纯音乐，如遇歌词有但是显示这句话","请提交issue，歌曲id" + str(asa) )
-            self.ui.label.setText(lyric + ' ' + tlyric)
-            self.desktopLyric.set_lyrics(lyric,tlyric)
-            self.ui.label.adjustSize()
-            # print(res)
+        if abc == False:
+          if status == 414:
+              self.ui.label.setText(lyric)
+              self.desktopLyric.set_lyrics(lyric,tlyric)
+              self.ui.label.adjustSize()
+          else:
+              # self.desktopLyric.set_lyrics("间奏或纯音乐，如遇歌词有但是显示这句话","请提交issue，歌曲id" + str(asa) )
+              self.ui.label.setText(lyric + ' ' + tlyric)
+              self.desktopLyric.set_lyrics(lyric,tlyric)
+              self.ui.label.adjustSize()
+              # print(res)
 
 #############信息更新
     def update_a(self):
+      global abc
       mp = pympris.MediaPlayer(allset.idss, allset.bus)
       aa = str(mp.root.Identity)
       # print(aa)
@@ -315,8 +319,10 @@ class Main(FluentWindow):
         # self.ui.label9.adjustSize()
         # self.ui1.label2.setText(name + ' - ' + singername1 + ' - ' + alname )
         # self.ui1.label2.adjustSize()
+        abc = False
       else:
           self.ui1.bas.like.nolike(False)
+          abc = True
           self.ui.label9.setText(self.tr("不是Yesplaymusic，无法获取歌曲ID" ))
 
 #####读取播放状态
@@ -348,6 +354,10 @@ class Main(FluentWindow):
             artist_str = self.tr("无艺术家")
         if title != "":
             title = str(title)
+            if abc == True :
+              allset.lyric = title
+            else:
+              allset.lyric = ""
         else:
             title = self.tr("无标题")
         if album != "":
@@ -362,7 +372,10 @@ class Main(FluentWindow):
         progress1 = p[:-6] + '.' + p[-6:]
         length1 = l[:-6] + '.' + l[-6:]
         progress1 = float(progress1)
-        length1 = float(length1)
+        try:
+            length1 = float(length1)
+        except ValueError:
+            length1 = 0.0  # 或者设为一个默认值
         self.playbackstatus = mp.player.PlaybackStatus
         if  self.playbackstatus == 'Paused' :
               self.playaa = False
@@ -604,6 +617,10 @@ def showDialog():
       # w = MessageDialog(title, content, self)   # Win10 style message box
       w = MessageBox(title, content, window)
       if w.exec():
+          if allset.lycl == 1 :
+            Main.close_desktopLyric(window)
+          window.close()
+          tray_icon.close()
           sys.exit(app.exec())
 
 def showwindows():
